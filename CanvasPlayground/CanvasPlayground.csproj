@@ -298,7 +298,6 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="index.html" />
-    <None Include="Properties\PublishProfiles\CanvasPlayground2505 - Web Deploy.pubxml" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -308,7 +307,6 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <None Include="Properties\PublishProfiles\CanvasPlayground2506 - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\CanvasPlayground2506.pubxml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
