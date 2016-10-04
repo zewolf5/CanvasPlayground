@@ -19,12 +19,7 @@ namespace CanvasPlayground
              url: "{controller}/{action}/{id}",
              defaults: "index.html"
             );
-
-            //routes.MapRoute(
-            //    name: "Default",
-            //    url: "{controller}/{action}/{id}",
-            //    defaults: new { controller = "api", action = "values", id = UrlParameter.Optional }
-            //);
+         
         }
     }
 }

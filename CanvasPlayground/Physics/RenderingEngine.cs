@@ -20,19 +20,21 @@ namespace CanvasPlayground.Physics
     public class RenderingEngine
     {
 
+        //2 lists of all the objects
         List<IFigure> _figures = new List<IFigure>();
         List<IComplexFigure> _cfigures = new List<IComplexFigure>();
 
+        //Frame counter
+        public long FrameNo { get; internal set; }
+
+        //Misc
         Random _random = new Random();
         private int _width = 800;
         private int _height = 800;
-        public long FrameNo { get; internal set; }
+        private World _world = new World(new Vector2(0f, 2.82f));
+        private DateTime _lastRun = DateTime.MinValue;
 
-        public void SetWorldBox(int width, int height)
-        {
-            this._width = width;
-            this._height = height;
-        }
+
 
         #region Initialize Thread
         private bool _runEngine = true;
@@ -40,9 +42,11 @@ namespace CanvasPlayground.Physics
         private static RenderingEngine _instance;
 
         private static object _locker = new object();
-
         private static object _syncClearItem = new object();
 
+        private Thread _stepThread = null;
+        private Action _doStepWork = null;
+        private bool _stepWorkDone = false;
 
         public static RenderingEngine Instance
         {
@@ -94,8 +98,12 @@ namespace CanvasPlayground.Physics
 
         #endregion
 
-        private World _world = new World(new Vector2(0f, 2.82f));
-        private DateTime _lastRun = DateTime.MinValue;
+        public void SetWorldBox(int width, int height)
+        {
+            this._width = width;
+            this._height = height;
+        }
+
 
         public void InitializeEngineLoop()
         {
@@ -121,6 +129,7 @@ namespace CanvasPlayground.Physics
             }
             Debug.WriteLine("Engine Stopped");
         }
+
         public void MainEngineLoop()
         {
             //_timer.Stop();
@@ -163,9 +172,7 @@ namespace CanvasPlayground.Physics
             Thread.Sleep(30);
         }
 
-        private Thread _stepThread = null;
-        private Action _doStepWork = null;
-        private bool _stepWorkDone = false;
+     
         private void DoTheStepTimeout(float time)
         {
             lock (_locker)
@@ -312,8 +319,6 @@ namespace CanvasPlayground.Physics
         public void CreateObstacles()
         {
             lock (_cfigures) _cfigures.Add(new HollowRectangle(_world, _width, _height, 25, _width / 2, _height / 2) { Restitution = 1f, Static = true, Density = 1f, Friction = 0, RotationPerSecond = 0.0f });
-            //lock (_figures) _figures.Add(new Rectangle(_world, 200, 25, 0.5f, 400, 300) { Restitution = 1f, Static = true, Density = 1f, Friction = 0 });
-            //lock (_figures) _figures.Add(new Rectangle(_world, 200, 25, -0.5f, 450, 300) { Restitution = 1f, Static = true, Density = 1f, Friction = 0 });
 
             //lock (_cfigures) _cfigures.Add(
             //    new HollowCircleWithInnerSpikes(_world, _height / 2, 25, _width / 2, _height / 2)

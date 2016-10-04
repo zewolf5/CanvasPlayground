@@ -31,25 +31,6 @@
         var context = canvas.getContext("2d");
 
 
-
-        function drawSimpleShape(posx, posy, color) {
-            //context.translate(posx, posy);
-
-            context.beginPath(0, 0);
-            context.lineTo(100, 0);
-            context.lineTo(100, 100);
-            context.lineTo(0, 100);
-            context.lineTo(0, 0);
-            context.closePath();
-            context.lineWidth = 5;
-            context.fillStyle = '#8ED6FF';
-            context.fill();
-            context.strokeStyle = 'blue';
-            context.stroke();
-
-            //context.translate(-posx, -posy);
-        }
-
         function drawShape(pos, array, color) {
             context.translate(pos.X, pos.Y);
             if (array.length > 0) {
@@ -76,20 +57,7 @@
         }
 
 
-        //drawLine(canvas, 0, 0, 200, 200, "red", 2);
-        function drawLine(canvasElem, x1, y1, x2, y2, color, lineWidth) {
-            var ctx = canvasElem.getContext("2d");
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = lineWidth;
-            ctx.stroke();
-        }
-
-
         function drawCircle(posx, posy, color) {
-            // Draw the earth
             context.translate(posx, posy);
 
             context.fillStyle = color;
@@ -103,17 +71,12 @@
             context.translate(-posx, -posy);
         }
 
-        function getRandomColor() {
-            return "#" + getRandomInt(1, 9) + "" + getRandomInt(1, 9) + "" + getRandomInt(1, 9) + "";
-        }
-        // Draw the chess board
-
+  
 
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        var color = getRandomColor();
 
         var sceneObject;
         var lastSceneObject;
@@ -125,14 +88,8 @@
 
         var lastTime = +new Date();
         var timeOfCall = +new Date();
+
         function getDrawingData() {
-            context.save();
-            //// Use the identity matrix while clearing the canvas
-            //context.setTransform(1, 0, 0, 1, 0, 0);
-            //context.clearRect(0, 0, canvas.width, canvas.height);
-            //context.clear();
-            // Restore the transform
-            context.restore();
             $.ajax({
                 type: "GET",
                 url: "/api/values?method=getObjects",
@@ -140,7 +97,6 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (response) {
-                    //alert(JSON.stringify(response));
                     if (frameNo < response.FrameNo) {
                         sceneObject = response;
                         frameNo = sceneObject.FrameNo;
@@ -153,7 +109,6 @@
                         }
                         fpsCount++;
                     }
-                    //GetDrawingData();
                 }
             });
         }
@@ -161,12 +116,9 @@
         var redraw = function () {
 
             if (lastFrameNo == frameNo) {
-
-                //Guestimer
                 var now = +new Date();
                 var timeGone = now - lastTime;
                 lastTime = now;
-                //console.log("Meanwhile..." + timeGone);
                 if (lastSceneObject !== undefined) {
                     var itemsObject = lastSceneObject.Objects;
 
@@ -178,6 +130,7 @@
                                 context.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
                             }
 
+                            //Interpolate
                             for (var i = 0; i < itemsObject.length; i++) {
 
                                 var dx = itemsObject[i].D.X;
@@ -186,22 +139,9 @@
                                 dy = dy * timeGone / 1000;
                                 itemsObject[i].P.X = itemsObject[i].P.X + dx;
                                 itemsObject[i].P.Y = itemsObject[i].P.Y + dy;
-
-                                if (itemsObject[i].V !== null) {
-                                    drawShape(itemsObject[i].P, itemsObject[i].V, itemsObject[i].C);
-                                } else {
-                                    drawCircle(itemsObject[i].P.X, itemsObject[i].P.Y, itemsObject[i].C);
-                                }
-                                if ((itemsObject[i].I + "").length == 4) {
-                                    drawText(itemsObject[i].P.X - 20, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                                } else if ((itemsObject[i].I + "").length == 3) {
-                                    drawText(itemsObject[i].P.X - 15, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                                } else if ((itemsObject[i].I + "").length == 2) {
-                                    drawText(itemsObject[i].P.X - 10, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                                } else {
-                                    drawText(itemsObject[i].P.X - 5, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                                }
                             }
+
+                            renderBallsNStuff(itemsObject); //Draw all the objects
                         }
                     }
                 }
@@ -216,32 +156,85 @@
                     if (canvas !== undefined) {
                         context.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
                     }
-                    2
 
+                    renderBallsNStuff(itemsObject);  //Draw all the objects
 
-                    if (itemsObject !== undefined) {
-                        for (var i = 0; i < itemsObject.length; i++) {
-                            //alert("COLOR: " +itemsObject[i].C);
-                            if (itemsObject[i].V !== null) {
-                                drawShape(itemsObject[i].P, itemsObject[i].V, itemsObject[i].C);
-                            } else {
-                                drawCircle(itemsObject[i].P.X, itemsObject[i].P.Y, itemsObject[i].C);
-                            }
-                            if ((itemsObject[i].I + "").length == 4) {
-                                drawText(itemsObject[i].P.X - 20, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                            } else if ((itemsObject[i].I + "").length == 3) {
-                                drawText(itemsObject[i].P.X - 15, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                            } else if ((itemsObject[i].I + "").length == 2) {
-                                drawText(itemsObject[i].P.X - 10, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                            } else {
-                                drawText(itemsObject[i].P.X - 5, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                            }
-                        }
-                    }
                 }
             }
             requestAnimationFrame(redraw);
         }
+
+        function renderBallsNStuff(itemsObject) {
+            if (itemsObject !== undefined) {
+                for (var i = 0; i < itemsObject.length; i++) {
+                    if (itemsObject[i].V !== null) {
+                        drawShape(itemsObject[i].P, itemsObject[i].V, itemsObject[i].C);
+                    } else {
+                        drawCircle(itemsObject[i].P.X, itemsObject[i].P.Y, itemsObject[i].C);
+                    }
+                    if ((itemsObject[i].I + "").length == 4) {
+                        drawText(itemsObject[i].P.X - 20, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                    } else if ((itemsObject[i].I + "").length == 3) {
+                        drawText(itemsObject[i].P.X - 15, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                    } else if ((itemsObject[i].I + "").length == 2) {
+                        drawText(itemsObject[i].P.X - 10, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                    } else {
+                        drawText(itemsObject[i].P.X - 5, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                    }
+                }
+            }
+        }
+
+   
+
+        $("#adjust").val(30);
+        setClientRectangle();
+
+        $("#board")
+            .click(function (event) {
+                var rect = canvas.getBoundingClientRect();
+                var x = event.clientX - rect.left;
+                var y = event.clientY - rect.top;
+                runAjaxMethodInput("method=click" + "&clickX=" + x + "&clickY=" + (y));
+            });
+
+
+        //Set client width (to server)
+        function setClientRectangle() {
+            var winW = 630, winH = 460;
+            if (document.body && document.body.offsetWidth) {
+                winW = document.body.offsetWidth;
+                winH = document.body.offsetHeight;
+            }
+            if (document.compatMode == 'CSS1Compat' &&
+                document.documentElement &&
+                document.documentElement.offsetWidth) {
+                winW = document.documentElement.offsetWidth;
+                winH = document.documentElement.offsetHeight;
+            }
+            if (window.innerWidth && window.innerHeight) {
+                winW = window.innerWidth;
+                winH = window.innerHeight;
+            }
+
+            winH = winH - 130;
+            winW = winW - 15;
+            runAjaxMethodInput("sizeX=" + winW + "&sizeY=" + (winH));
+            $("#board").attr("width", winW + "px");
+            $("#board").attr("height", (winH) + "px");
+
+
+            //Set timer based on input
+            var timer = function() {
+                getDrawingData();
+                setTimeout(timer, $("#adjust").val());
+            };
+            setTimeout(timer, $("#adjust").val());
+
+            //Start drawing loop
+            redraw();
+        }
+
 
 
         function runAjaxMethod(method) {
@@ -268,61 +261,6 @@
                 }
             });
         }
-
-        $("#adjust").val(30);
-
-        var winW = 630, winH = 460;
-        if (document.body && document.body.offsetWidth) {
-            winW = document.body.offsetWidth;
-            winH = document.body.offsetHeight;
-        }
-        if (document.compatMode == 'CSS1Compat' &&
-            document.documentElement &&
-            document.documentElement.offsetWidth) {
-            winW = document.documentElement.offsetWidth;
-            winH = document.documentElement.offsetHeight;
-        }
-        if (window.innerWidth && window.innerHeight) {
-            winW = window.innerWidth;
-            winH = window.innerHeight;
-        }
-        winH = winH - 130;
-        winW = winW - 15;
-        runAjaxMethodInput("sizeX=" + winW + "&sizeY=" + (winH));
-        $("#board").attr("width", winW + "px");
-        $("#board").attr("height", (winH) + "px");
-
-        //var oldAdjust = $("#adjust").val();
-
-        var timer = function() {
-            getDrawingData();
-            setTimeout(timer, $("#adjust").val());
-        };
-
-        setTimeout(timer, $("#adjust").val());
-
-        //var timer = setTimeout(function () {
-        //    getDrawingData();
-        //    timer();
-        //}, $("#adjust").val());
-
-        redraw();
-
-
-        function getCursorPosition(canvas, event) {
-            var rect = canvas.getBoundingClientRect();
-            var x = event.clientX - rect.left;
-            var y = event.clientY - rect.top;
-
-            runAjaxMethodInput("method=click"+ "&clickX=" + x + "&clickY=" + (y));
-
-            //console.log("x: " + x + " y: " + y);
-        }
-
-        $("#board")
-            .click(function(event) {
-                getCursorPosition(canvas, event);
-            });
 
     </script>
 
