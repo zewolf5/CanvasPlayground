@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.SessionState;
+using CanvasPlayground.Models;
 using CanvasPlayground.Physics;
 using Newtonsoft.Json;
 
@@ -26,13 +27,13 @@ namespace CanvasPlayground.Controllers
 
         public object Get(int sizeX, int sizeY)
         {
-            RenderingEngine.Instance.SetWorldBox(sizeX, sizeY);
+            RenderingHub.Instance.SetWorldBox(sizeX, sizeY);
             return "OK";
         }
 
         public object Get(string method, int clickX, int clickY)
         {
-            RenderingEngine.Instance.AddBall(clickX, clickY);
+            RenderingHub.Instance.AddBall(clickX, clickY);
             return "OK";
         }
 
@@ -54,9 +55,9 @@ namespace CanvasPlayground.Controllers
             if (method == "getObjects")
             {
                 var scene = new SceneUpdate();
-                scene.FrameNo = RenderingEngine.Instance.FrameNo;
+                scene.FrameNo = RenderingHub.Instance.FrameNo;
                 //scene.Objects = new List<ObjectInfo>();//RenderingEngine.Instance.GetObjects().ToList();
-                scene.Objects = RenderingEngine.Instance.GetObjects().ToList();
+                scene.Objects = RenderingHub.Instance.GetObjects().ToList();
                 return scene;
             }
 
@@ -65,57 +66,63 @@ namespace CanvasPlayground.Controllers
 
             if (method == "start")
             {
-                RenderingEngine.Instance.Start();
+                RenderingHub.Instance.Start();
                 return "OK";
             }
 
             if (method == "stop")
             {
-                RenderingEngine.Instance.Stop();
+                RenderingHub.Instance.Stop();
                 return "OK";
             }
 
             if (method == "reverseGravity")
             {
-                RenderingEngine.Instance.ReverseGravity();
+                RenderingHub.Instance.ReverseGravity();
                 return "OK";
             }
 
             if (method == "addBall")
             {
-                RenderingEngine.Instance.AddRandomBall();
+                RenderingHub.Instance.AddRandomBall();
                 return "OK";
             }
             if (method == "addTriangle")
             {
-                for (int i = 0; i < 3; i++) RenderingEngine.Instance.AddTriangle();
+                for (int i = 0; i < 3; i++) RenderingHub.Instance.AddTriangle();
                 return "OK";
             }
             if (method == "addRect")
             {
-                for (int i = 0; i < 3; i++) RenderingEngine.Instance.AddRect();
+                for (int i = 0; i < 3; i++) RenderingHub.Instance.AddRect();
                 return "OK";
             }
             if (method == "addStuff")
             {
-                RenderingEngine.Instance.CreateStuff();
+                RenderingHub.Instance.CreateStuff();
                 return "OK";
             }
             if (method == "addCross")
             {
-                for (int i = 0; i < 3; i++) RenderingEngine.Instance.CreateCross();
+                for (int i = 0; i < 3; i++) RenderingHub.Instance.CreateCross();
                 return "OK";
             }
 
             if (method == "add10Ball")
             {
-                for (int i = 0; i < 10; i++) RenderingEngine.Instance.AddRandomBall();
+                for (int i = 0; i < 10; i++) RenderingHub.Instance.AddRandomBall();
+                return "OK";
+            }
+
+            if (method == "bigWheel")
+            {
+                RenderingHub.Instance.BigWheel();
                 return "OK";
             }
 
             if (method == "removeItem")
             {
-                RenderingEngine.Instance.RemoveLastItem();
+                RenderingHub.Instance.RemoveLastItem();
                 return "OK";
             }
 

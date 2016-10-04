@@ -1,8 +1,7 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
-namespace CanvasPlayground.Physics
+namespace CanvasPlayground.Models
 {
     public class ObjectInfo
     {

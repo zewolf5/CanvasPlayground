@@ -287,9 +287,10 @@
     <Compile Include="Physics\Figures\Simple\Rectangle.cs" />
     <Compile Include="Physics\Figures\Simple\Circle.cs" />
     <Compile Include="Physics\Figures\IFigure.cs" />
-    <Compile Include="Physics\ObjectInfo.cs" />
-    <Compile Include="Physics\RenderingEngine.cs" />
-    <Compile Include="Physics\SceneUpdate.cs" />
+    <Compile Include="Models\ObjectInfo.cs" />
+    <Compile Include="Physics\RenderingHub.cs" />
+    <Compile Include="Models\SceneUpdate.cs" />
+    <Compile Include="Physics\WorldLoop.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>

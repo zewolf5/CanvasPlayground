@@ -17,6 +17,10 @@ namespace CanvasPlayground.Physics.Figures
         Body Body { get; }
         Shape Shape { get; }
         Fixture Fixture { get; }
+
+        event Func<IFigure, IFigure, FarseerPhysics.Dynamics.Contacts.Contact, bool> OnCollision;
+
+
         Vertices Vertices { get; }
         Vertices OriginalVertices { get; }
         int X { get; }

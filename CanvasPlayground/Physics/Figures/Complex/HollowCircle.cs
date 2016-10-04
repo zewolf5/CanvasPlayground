@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,6 +34,8 @@ namespace CanvasPlayground.Physics.Figures
                 var angle = angles[i];
                 var figure1 = new Rectangle(world, borderSize, length, angle, x + (int)circleVertex.X, y + (int)circleVertex.Y);
 
+                figure1.OnCollision += Figure1_OnCollision;
+
 
                 Figures.Add(figure1);
 
@@ -55,6 +58,12 @@ namespace CanvasPlayground.Physics.Figures
             Density = 0.3f;
             Friction = 0;
             Restitution = 1;
+        }
+
+        private bool Figure1_OnCollision(IFigure arg1, IFigure arg2, FarseerPhysics.Dynamics.Contacts.Contact arg3)
+        {
+            Debug.WriteLine($"Collision between: {arg1.Id} and : {arg2.Id}");
+            return true;
         }
 
         public Vertices CreateCircleVertices(float radius, float pieces, out float[] angles)

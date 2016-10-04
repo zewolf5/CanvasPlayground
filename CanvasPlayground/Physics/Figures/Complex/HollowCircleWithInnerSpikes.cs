@@ -32,7 +32,7 @@ namespace CanvasPlayground.Physics.Figures
                 var circleVertex = circleVertices[i];
                 var angle = angles[i];
                 var figure1 = new Rectangle(world, borderSize, length, angle, x + (int)circleVertex.X, y + (int)circleVertex.Y);
-                var figureX = new Rectangle(world, radius/3, 5, angle, x + (int)circleVertex.X, y + (int)circleVertex.Y);
+                var figureX = new Rectangle(world, radius/3, 15, angle, x + (int)circleVertex.X, y + (int)circleVertex.Y);
 
                 Figures.Add(figure1);
                 Figures.Add(figureX);

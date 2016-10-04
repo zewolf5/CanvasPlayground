@@ -105,6 +105,8 @@ namespace FarseerPhysics.Dynamics
         public int ProxyCount;
         public Category IgnoreCCDWith;
 
+        public object Tag { get; set; }
+
         /// <summary>
         /// Fires after two shapes has collided and are solved. This gives you a chance to get the impact force.
         /// </summary>

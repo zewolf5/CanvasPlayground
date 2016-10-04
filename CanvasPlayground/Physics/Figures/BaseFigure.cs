@@ -14,6 +14,40 @@ namespace CanvasPlayground.Physics.Figures
 {
     public class BaseFigure : Base, IFigure
     {
+        public event Func<IFigure, IFigure, FarseerPhysics.Dynamics.Contacts.Contact, bool> OnCollision;
+
+        public void Create(int x, int y, Vertices shape, int radius = 0)
+        {
+            var location = ConvertUnits.ToSimUnits(x, y);
+
+            Body = new Body(World, location, 0, 0);
+            Body.BodyType = BodyType.Dynamic;
+            Body.AngularVelocity = 0f;
+            Body.Mass = 0.001f;
+
+            if (shape.Count <= 1)
+            {
+                //circle
+                Shape = new CircleShape(ConvertUnits.ToSimUnits(radius), 0.3f);
+            }
+            else
+            {
+                Shape = new PolygonShape(shape, 1f);
+            }
+
+            Fixture = Body.CreateFixture(Shape);
+            //Body.OnCollision += Body_OnCollision;
+
+            OriginalVertices = shape;
+
+            Fixture.Tag = this;
+        }
+
+        private bool Body_OnCollision(Fixture fixtureA, Fixture fixtureB, FarseerPhysics.Dynamics.Contacts.Contact contact)
+        {
+            return OnCollision?.Invoke(fixtureA.Tag as IFigure, fixtureB.Tag as IFigure, contact) ?? true;
+        }
+
         public World World { get; private set; }
         public Body Body { get; private set; }
         public Shape Shape { get; private set; }
@@ -113,44 +147,6 @@ namespace CanvasPlayground.Physics.Figures
             Y = y;
         }
 
-        public void Create(int x, int y, Vertices shape, int radius = 0)
-        {
-            var location = ConvertUnits.ToSimUnits(x, y);
-
-            Body = new Body(World, location, 0, 0);
-            Body.BodyType = BodyType.Dynamic;
-            Body.AngularVelocity = 0f;
-            Body.Mass = 0.001f;
-            //Body.LinearVelocity = new Vector2((float)(r.NextDouble() * 3f) - 1.5f, (float)(r.NextDouble() * 3f) - 1.5f);
-            //Body.Restitution = restitution;
-            //Body.Friction = friction;
-
-
-            if (shape.Count <= 1)
-            {
-                //circle
-                Shape = new CircleShape(ConvertUnits.ToSimUnits(radius), 0.3f);
-            }
-            else
-            {
-                Shape = new PolygonShape(shape, 1f);
-            }
-
-            try
-            {
-                Fixture = Body.CreateFixture(Shape);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            //Fixture.Restitution = restitution;
-            //Fixture.Friction = friction;
-
-            OriginalVertices = shape;
-
-        }
 
         public void Clear()
         {
