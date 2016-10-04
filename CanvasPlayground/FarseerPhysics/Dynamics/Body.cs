@@ -115,7 +115,7 @@ namespace FarseerPhysics.Dynamics
                 _sweep.A = rotation;
             }
 
-            world.AddBody(this); //FPE note: bodies can't live without a World
+            world?.AddBody(this); //FPE note: bodies can't live without a World
         }
 
         /// <summary>

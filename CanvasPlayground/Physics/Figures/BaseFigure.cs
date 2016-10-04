@@ -18,29 +18,36 @@ namespace CanvasPlayground.Physics.Figures
 
         public void Create(int x, int y, Vertices shape, int radius = 0)
         {
-            var location = ConvertUnits.ToSimUnits(x, y);
-
-            Body = new Body(World, location, 0, 0);
-            Body.BodyType = BodyType.Dynamic;
-            Body.AngularVelocity = 0f;
-            Body.Mass = 0.001f;
-
-            if (shape.Count <= 1)
+            try
             {
-                //circle
-                Shape = new CircleShape(ConvertUnits.ToSimUnits(radius), 0.3f);
+                var location = ConvertUnits.ToSimUnits(x, y);
+
+                Body = new Body(World, location, 0, 0);
+                Body.BodyType = BodyType.Dynamic;
+                Body.AngularVelocity = 0f;
+                Body.Mass = 0.001f;
+
+                if (shape.Count <= 1)
+                {
+                    //circle
+                    Shape = new CircleShape(ConvertUnits.ToSimUnits(radius), 0.3f);
+                }
+                else
+                {
+                    Shape = new PolygonShape(shape, 1f);
+                }
+
+                Fixture = Body.CreateFixture(Shape);
+                //Body.OnCollision += Body_OnCollision;
+
+                OriginalVertices = shape;
+
+                Fixture.Tag = this;
             }
-            else
+            catch (Exception)
             {
-                Shape = new PolygonShape(shape, 1f);
+                if (World != null) throw;
             }
-
-            Fixture = Body.CreateFixture(Shape);
-            //Body.OnCollision += Body_OnCollision;
-
-            OriginalVertices = shape;
-
-            Fixture.Tag = this;
         }
 
         private bool Body_OnCollision(Fixture fixtureA, Fixture fixtureB, FarseerPhysics.Dynamics.Contacts.Contact contact)

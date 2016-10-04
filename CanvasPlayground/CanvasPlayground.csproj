@@ -303,6 +303,9 @@
     <Content Include="Global.asax" />
     <Content Include="index.html" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
+    <Content Include="Scripts\lazy.json.js" />
+    <Content Include="Scripts\lazy.min.js" />
+    <Content Include="Scripts\XMLHttpRequest.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

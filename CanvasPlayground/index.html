@@ -6,9 +6,15 @@
 </head>
 <body>
     <script src="/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="/Scripts/lazy.min.js"></script>
+    <script src="/Scripts/lazy.json.js"></script>
+    <script src="/Scripts/XMLHttpRequest.js"></script>
+
+
     <a href="#" onclick="runAjaxMethod('stop');">Stop</a>
     <a href="#" onclick="runAjaxMethod('start');">Start</a>
     <a href="/api/values?method=getObjects" target="_blank">Get Objects</a>
+    <a href="/api/values?method=getObjectsStream" target="_blank">Get Objects Stream</a>
     <a href="#" onclick="runAjaxMethod('reverseGravity');">Reverse Gravity</a>
     <a href="#" onclick="runAjaxMethod('addBall');">Add Ball</a>
     <a href="#" onclick="runAjaxMethod('addTriangle');">Add Triangle</a>
@@ -21,15 +27,68 @@
     <a href="#" onclick="runAjaxMethod('sceneTestScene');">Start Test Scene</a>
     <a href="#" onclick="runAjaxMethod('eventSomeEvent');">Event to Test Scene</a>
 
+
     <div style=""><input type="checkbox" checked id="checky" style="height: 30px; width: 30px;display:inline-block" value="0" /></div>
-    <div style="display:inline-block">Server polling time: <input type="text" id="adjust" style="display:inline-block"/></div>
-    <div id="text" style="display:inline-block">0</div> <div id="fps" style="display:inline-block">0</div>
+    <div style="display:inline-block">Server polling time: <input type="text" id="adjust" style="display:inline-block" /></div>
+    <div id="text" style="display: inline-block">-1</div>
+    <div id="fps" style="display: inline-block">-1</div>
+    <div id="text2" style="display: inline-block">x</div>
+    <br />
+    <div id="text3" style="display:inline-block">y</div>
+
 
     <canvas id="board" width="1200" height="1000">
         Not supported
     </canvas>
 
+
     <script id="chess board" type="text/javascript">
+
+
+        $(function () {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/api/values?method=getObjectsStream', true);
+            xhr.send(null);
+            var timer;
+            timer = window.setInterval(function () {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    window.clearTimeout(timer);
+                    $('body').append('done <br />');
+                }
+                //$('body').append('state: ' + xhr.readyState + '<br />');
+                //$('body').append('data: ' + xhr.responseText + '<br />');
+                parseStream(xhr.responseText);
+
+            }, 10);
+
+        });
+
+        function parseStream(text) {
+            var items = text.split('\n\n');
+            var lastItem = items[items.length - 2];
+            //$("#text2").html(lastItem);
+            //$('body').append(json);
+            var response = JSON.stringify(eval("(" + lastItem + ")"));
+            var json = JSON.parse(response);
+            parseJsonData(json);
+            //$("#text3").html(json);
+
+        }
+        function parseJsonData(response) {
+            if (frameNo < response.FrameNo) {
+                sceneObject = response;
+                frameNo = sceneObject.FrameNo;
+                $("#text").html("Objects: " + sceneObject.Objects.length);
+                var fpsNow = +new Date();
+                if (fpsNow - fpsStart > 1000) {
+                    $("#fps").html("FPS: " + fpsCount);
+                    fpsStart = fpsNow;
+                    fpsCount = 0;
+                }
+                fpsCount++;
+            }
+        }
+
         // Get the canvas context
         var canvas = document.getElementById("board");
         var context = canvas.getContext("2d");
@@ -75,7 +134,7 @@
             context.translate(-posx, -posy);
         }
 
-  
+
 
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -94,27 +153,27 @@
         var timeOfCall = +new Date();
 
         function getDrawingData() {
-            $.ajax({
-                type: "GET",
-                url: "/api/values?method=getObjects",
-                data: "",
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (response) {
-                    if (frameNo < response.FrameNo) {
-                        sceneObject = response;
-                        frameNo = sceneObject.FrameNo;
-                        $("#text").html("Objects: " + sceneObject.Objects.length);
-                        var fpsNow = +new Date();
-                        if (fpsNow - fpsStart > 1000) {
-                            $("#fps").html("FPS: " + fpsCount);
-                            fpsStart = fpsNow;
-                            fpsCount = 0;
-                        }
-                        fpsCount++;
-                    }
-                }
-            });
+            //$.ajax({
+            //    type: "GET",
+            //    url: "/api/values?method=getObjects",
+            //    data: "",
+            //    contentType: "application/json; charset=utf-8",
+            //    dataType: "json",
+            //    success: function (response) {
+            //        if (frameNo < response.FrameNo) {
+            //            sceneObject = response;
+            //            frameNo = sceneObject.FrameNo;
+            //            $("#text").html("Objects: " + sceneObject.Objects.length);
+            //            var fpsNow = +new Date();
+            //            if (fpsNow - fpsStart > 1000) {
+            //                $("#fps").html("FPS: " + fpsCount);
+            //                fpsStart = fpsNow;
+            //                fpsCount = 0;
+            //            }
+            //            fpsCount++;
+            //        }
+            //    }
+            //});
         }
 
         var redraw = function () {
@@ -189,9 +248,9 @@
             }
         }
 
-   
 
-        $("#adjust").val(30);
+
+        //$("#adjust").val(200);
         setClientRectangle();
 
         $("#board")
@@ -229,11 +288,11 @@
 
 
             //Set timer based on input
-            var timer = function() {
-                getDrawingData();
-                setTimeout(timer, $("#adjust").val());
-            };
-            setTimeout(timer, $("#adjust").val());
+            //var timer = function () {
+            //    getDrawingData();
+            //    setTimeout(timer, $("#adjust").val());
+            //};
+            //setTimeout(timer, $("#adjust").val());
 
             //Start drawing loop
             redraw();

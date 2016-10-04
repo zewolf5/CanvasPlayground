@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.SessionState;
@@ -18,12 +22,10 @@ namespace CanvasPlayground.Controllers
     [SessionState(SessionStateBehavior.ReadOnly)]
     public class ValuesController : ApiController
     {
-        static Stopwatch _sw = Stopwatch.StartNew();
-        //// GET api/values
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2" };
-        //}
+
+        private static Lazy<Timer> updateTimer = new Lazy<Timer>(() => new Timer(UpdateClientsCallback, null, 0, 15));
+        private static ConcurrentDictionary<StreamWriter, bool> clientSubscribers = new ConcurrentDictionary<StreamWriter, bool>();
+
 
         public object Get(int sizeX, int sizeY)
         {
@@ -37,19 +39,19 @@ namespace CanvasPlayground.Controllers
             return "OK";
         }
 
+
+
+
         // GET api/values/5
         public object Get(string method)
         {
-            //Debug.WriteLine($"calltime: {(int)sw.ElapsedMilliseconds} - {RenderingEngine.Instance.FrameNo}");
-
-            _sw = Stopwatch.StartNew();
-
-            if (method == "getObjectsxxx")
+            if (method == "getObjectsStream")
             {
-                var scene = new SceneUpdate();
-                scene.FrameNo = 0;
-                scene.Objects = new List<ObjectInfo>();
-                return scene;
+                Request.Headers.AcceptEncoding.Clear();
+                HttpResponseMessage response = Request.CreateResponse();
+                response.Headers.Add("Access-Control-Allow-Origin", "*");
+                response.Content = new PushStreamContent(OnStreamAvailable, "text/event-stream");
+                return response;
             }
 
             if (method == "getObjects")
@@ -61,11 +63,9 @@ namespace CanvasPlayground.Controllers
                 return scene;
             }
 
-            //Debug.WriteLine($"calltime: {(int)sw.ElapsedMilliseconds} - {RenderingEngine.Instance.FrameNo}");
-            _sw = Stopwatch.StartNew();
-
             if (method == "start")
             {
+                var touch = updateTimer.Value;
                 RenderingHub.Instance.Start();
                 return "OK";
             }
@@ -156,5 +156,44 @@ namespace CanvasPlayground.Controllers
         public void Delete(int id)
         {
         }
+
+
+        private static Task OnStreamAvailable(Stream stream, HttpContent headers, TransportContext context)
+        {
+            return Task.Run(() =>
+            {
+                StreamWriter writer = new StreamWriter(stream);
+                clientSubscribers.TryAdd(writer, false);
+
+            });
+        }
+
+        private static void UpdateClientsCallback(object state)
+        {
+            var scene = new SceneUpdate();
+            scene.FrameNo = RenderingHub.Instance.FrameNo;
+            scene.Objects = RenderingHub.Instance.GetObjects().ToList();
+
+            foreach (var pair in clientSubscribers.ToArray())
+            {
+                StreamWriter writer = pair.Key;
+
+                try
+                {
+                    writer.Write(JsonConvert.SerializeObject(scene) + "\n\n");
+                    //writer.Write(JsonConvert.SerializeObject(scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo + "" + scene.FrameNo) + "\n\n");
+                    writer.Flush();
+                }
+                catch (Exception)
+                {
+                    bool dummy;
+                    if (clientSubscribers.TryRemove(writer, out dummy))
+                    {
+                        writer.Close();
+                    }
+                }
+            }
+        }
+
     }
 }
