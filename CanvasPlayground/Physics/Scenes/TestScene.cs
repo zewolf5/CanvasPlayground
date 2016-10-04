@@ -12,6 +12,8 @@ namespace CanvasPlayground.Physics.Scenes
 {
     public class TestScene : IScene
     {
+        List<IFigure> _sceneFigures = new List<IFigure>();
+
         private WorldLoop _worldLoop;
         public TestScene(WorldLoop worldLoop)
         {
@@ -22,26 +24,26 @@ namespace CanvasPlayground.Physics.Scenes
         {
             SceneTimer.RunSetup(new List<Tuple<int, Action>> {
                 new Tuple<int, Action>(500, () =>{
-                    _worldLoop?.AddFigure(new CircleFigure(_worldLoop.World, 75, 400, 400,40));
+                    AddFigure(new CircleFigure(_worldLoop.World, 75, 600, 400,40));
                 }),
                 new Tuple<int, Action>(1000, () =>{
-                    _worldLoop?.AddFigure(new CircleFigure(_worldLoop.World, 75, 600, 400,40));
+                    AddFigure(new CircleFigure(_worldLoop.World, 75, 600, 400,40));
                 }),
-                new Tuple<int, Action>(1500, () =>{
-                    _worldLoop?.AddFigure(new CircleFigure(_worldLoop.World, 75, 600, 600,40));
+                new Tuple<int, Action>(2000, () =>{
+                    AddFigure(new CircleFigure(_worldLoop.World, 75, 600, 600,40));
                 }),
-                new Tuple<int, Action>(2500, () =>{
-                    _worldLoop?.AddFigure(new CircleFigure(_worldLoop.World, 75, 400, 600,40));
+                new Tuple<int, Action>(3000, () =>{
+                    AddFigure(new CircleFigure(_worldLoop.World, 75, 400, 600,40));
                 }),
-                new Tuple<int, Action>(3500, () =>{
-                    _worldLoop?.AddFigure(new Rectangle(_worldLoop.World, 600,20, 0.2f, 500,500));
+                new Tuple<int, Action>(4000, () =>{
+                    AddFigure(new Rectangle(_worldLoop.World, 600,20, 0.2f, 500,500));
                 }),
 
                 new Tuple<int, Action>(10000, () =>{
-                    _worldLoop?.AddFigure(new Rectangle(_worldLoop.World, 600,20, 0.2f, 500,500) {Static = true});
+                    AddFigure(new Rectangle(_worldLoop.World, 600,20, 0.2f, 500,500) {Static = true});
                 }),
                 new Tuple<int, Action>(20000, () =>{
-                    _worldLoop?.AddFigure(new Rectangle(_worldLoop.World, 600,20, -0.2f, 1500,500) {Static = true});
+                    AddFigure(new Rectangle(_worldLoop.World, 600,20, -0.2f, 1500,500) {Static = true});
                 }),
             });
 
@@ -53,9 +55,19 @@ namespace CanvasPlayground.Physics.Scenes
             }
         }
 
+        private void AddFigure(IFigure figure)
+        {
+            _sceneFigures.Add(figure);
+            _worldLoop?.AddFigure(figure);
+        }
 
         public void Stop()
         {
+            //Clean up!
+            foreach (var sceneFigure in _sceneFigures)
+            {
+                _worldLoop.RemoveFigure(sceneFigure);
+            }
             _worldLoop = null;
         }
 

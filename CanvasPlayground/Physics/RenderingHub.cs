@@ -59,6 +59,7 @@ namespace CanvasPlayground.Physics
         public void SceneStart(string name)
         {
             var type = Misc.GetTypesByName(name);
+            _currentScene?.Stop();
             _currentScene = (IScene)Activator.CreateInstance(type, _theWorldLoop);
             Task.Run(() =>
             {

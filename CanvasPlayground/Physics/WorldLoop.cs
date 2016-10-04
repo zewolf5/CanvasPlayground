@@ -242,25 +242,27 @@ namespace CanvasPlayground.Physics
 
         public void AddFigure(IFigure figure)
         {
-            lock (_syncClearItem) Figures.Add(figure);
+            lock (Figures) Figures.Add(figure);
         }
 
 
         public void RemoveFigure(IFigure removeItem)
         {
             lock (_syncClearItem) removeItem.Clear();
+            lock (Figures) Figures.Remove(removeItem);
         }
 
 
         public void AddComplexFigure(IComplexFigure figure)
         {
-            lock (_syncClearItem) CFigures.Add(figure);
+            lock (CFigures) CFigures.Add(figure);
         }
 
 
         public void RemoveComplexFigure(IComplexFigure removeItem)
         {
             lock (_syncClearItem) removeItem.Clear();
+            lock (CFigures) CFigures.Remove(removeItem);
         }
 
         public void RemoveLast10()
