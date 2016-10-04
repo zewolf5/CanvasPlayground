@@ -1,0 +1,393 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+  <Import Project="..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{49D628BB-E2FB-47DA-A09C-1FEA75C0C0A2}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CanvasPlayground</RootNamespace>
+    <AssemblyName>CanvasPlayground</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest">
+    </Reference>
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Optimization">
+      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="WebGrease">
+      <Private>True</Private>
+      <HintPath>..\packages\WebGrease.1.5.2\lib\WebGrease.dll</HintPath>
+    </Reference>
+    <Reference Include="Antlr3.Runtime">
+      <Private>True</Private>
+      <HintPath>..\packages\Antlr.3.4.1.9004\lib\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Owin">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Owin.2.2.1\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.EntityFramework">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.EntityFramework.2.2.1\lib\net45\Microsoft.AspNet.Identity.EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Owin">
+      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.Owin">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Owin.5.2.3\lib\net45\System.Web.Http.Owin.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="ChipmunkSharp\Common\cp.cs" />
+    <Compile Include="ChipmunkSharp\Common\cpColor.cs" />
+    <Compile Include="ChipmunkSharp\Common\cpDebugDraw.cs" />
+    <Compile Include="ChipmunkSharp\Constraints\cpConstraint.cs" />
+    <Compile Include="ChipmunkSharp\Constraints\cpDampedRotarySpring.cs" />
+    <Compile Include="ChipmunkSharp\Constraints\cpDampedSpring.cs" />
+    <Compile Include="ChipmunkSharp\Constraints\cpGearJoint.cs" />
+    <Compile Include="ChipmunkSharp\Constraints\cpGrooveJoint.cs" />
+    <Compile Include="ChipmunkSharp\Constraints\cpPinJoint.cs" />
+    <Compile Include="ChipmunkSharp\Constraints\cpPivotJoint.cs" />
+    <Compile Include="ChipmunkSharp\Constraints\cpRatchetJoint.cs" />
+    <Compile Include="ChipmunkSharp\Constraints\cpRotaryLimitJoint.cs" />
+    <Compile Include="ChipmunkSharp\Constraints\cpSimpleMotor.cs" />
+    <Compile Include="ChipmunkSharp\Constraints\cpSlideJoint.cs" />
+    <Compile Include="ChipmunkSharp\cpArbiter.cs" />
+    <Compile Include="ChipmunkSharp\cpBB.cs" />
+    <Compile Include="ChipmunkSharp\cpBBTree.cs" />
+    <Compile Include="ChipmunkSharp\cpBody.cs" />
+    <Compile Include="ChipmunkSharp\cpCollision.cs" />
+    <Compile Include="ChipmunkSharp\cpContact.cs" />
+    <Compile Include="ChipmunkSharp\cpSpace.cs" />
+    <Compile Include="ChipmunkSharp\cpSpaceComponent.cs" />
+    <Compile Include="ChipmunkSharp\cpSpaceQuery.cs" />
+    <Compile Include="ChipmunkSharp\cpSpaceStep.cs" />
+    <Compile Include="ChipmunkSharp\cpTransform.cs" />
+    <Compile Include="ChipmunkSharp\cpVect.cs" />
+    <Compile Include="ChipmunkSharp\Helpers\RandomHelper.cs" />
+    <Compile Include="ChipmunkSharp\Shapes\cpPolyShape.cs" />
+    <Compile Include="ChipmunkSharp\Shapes\cpQueryInfo.cs" />
+    <Compile Include="ChipmunkSharp\Shapes\cpShape.cs" />
+    <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="FarseerPhysics\Collision\Collision.cs" />
+    <Compile Include="FarseerPhysics\Collision\Distance.cs" />
+    <Compile Include="FarseerPhysics\Collision\DynamicTree.cs" />
+    <Compile Include="FarseerPhysics\Collision\DynamicTreeBroadPhase.cs" />
+    <Compile Include="FarseerPhysics\Collision\IBroadPhase.cs" />
+    <Compile Include="FarseerPhysics\Collision\Shapes\ChainShape.cs" />
+    <Compile Include="FarseerPhysics\Collision\Shapes\CircleShape.cs" />
+    <Compile Include="FarseerPhysics\Collision\Shapes\EdgeShape.cs" />
+    <Compile Include="FarseerPhysics\Collision\Shapes\PolygonShape.cs" />
+    <Compile Include="FarseerPhysics\Collision\Shapes\Shape.cs" />
+    <Compile Include="FarseerPhysics\Collision\TimeOfImpact.cs" />
+    <Compile Include="FarseerPhysics\Common\ConvexHull\ChainHull.cs" />
+    <Compile Include="FarseerPhysics\Common\ConvexHull\GiftWrap.cs" />
+    <Compile Include="FarseerPhysics\Common\ConvexHull\Melkman.cs" />
+    <Compile Include="FarseerPhysics\Common\Curve.cs" />
+    <Compile Include="FarseerPhysics\Common\CurveKey.cs" />
+    <Compile Include="FarseerPhysics\Common\CurveKeyCollection.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\BayazitDecomposer.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDTDecomposer.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Delaunay\DelaunayTriangle.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Delaunay\Sweep\AdvancingFront.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Delaunay\Sweep\AdvancingFrontNode.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Delaunay\Sweep\DTSweep.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Delaunay\Sweep\DTSweepConstraint.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Delaunay\Sweep\DTSweepContext.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Delaunay\Sweep\DTSweepPointComparator.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Delaunay\Sweep\PointOnEdgeException.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\ITriangulatable.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Orientation.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Polygon\Polygon.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Polygon\PolygonPoint.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Polygon\PolygonSet.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Sets\ConstrainedPointSet.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Sets\PointSet.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\TriangulationConstraint.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\TriangulationContext.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\TriangulationMode.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\TriangulationPoint.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\TriangulationUtil.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Util\FixedArray3.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Util\FixedBitArray3.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Util\PointGenerator.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\CDT\Util\PolygonGenerator.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\EarclipDecomposer.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\FlipcodeDecomposer.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\SeidelDecomposer.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Seidel\Edge.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Seidel\MonotoneMountain.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Seidel\Node.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Seidel\Point.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Seidel\QueryGraph.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Seidel\Sink.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Seidel\Trapezoid.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Seidel\TrapezoidalMap.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Seidel\Triangulator.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Seidel\XNode.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Seidel\YNode.cs" />
+    <Compile Include="FarseerPhysics\Common\Decomposition\Triangulate.cs" />
+    <Compile Include="FarseerPhysics\Common\FixedArray.cs" />
+    <Compile Include="FarseerPhysics\Common\HashSet.cs" />
+    <Compile Include="FarseerPhysics\Common\LineTools.cs" />
+    <Compile Include="FarseerPhysics\Common\Math.cs" />
+    <Compile Include="FarseerPhysics\Common\MathHelper.cs" />
+    <Compile Include="FarseerPhysics\Common\Matrix.cs" />
+    <Compile Include="FarseerPhysics\Common\Path.cs" />
+    <Compile Include="FarseerPhysics\Common\PathManager.cs" />
+    <Compile Include="FarseerPhysics\Common\PhysicsLogic\FilterData.cs" />
+    <Compile Include="FarseerPhysics\Common\PhysicsLogic\PhysicsLogic.cs" />
+    <Compile Include="FarseerPhysics\Common\PhysicsLogic\RealExplosion.cs" />
+    <Compile Include="FarseerPhysics\Common\PhysicsLogic\SimpleExplosion.cs" />
+    <Compile Include="FarseerPhysics\Common\PolygonManipulation\CuttingTools.cs" />
+    <Compile Include="FarseerPhysics\Common\PolygonManipulation\SimpleCombiner.cs" />
+    <Compile Include="FarseerPhysics\Common\PolygonManipulation\SimplifyTools.cs" />
+    <Compile Include="FarseerPhysics\Common\PolygonManipulation\YuPengClipper.cs" />
+    <Compile Include="FarseerPhysics\Common\PolygonTools.cs" />
+    <Compile Include="FarseerPhysics\Common\Serialization.cs" />
+    <Compile Include="FarseerPhysics\Common\Stopwatch.cs" />
+    <Compile Include="FarseerPhysics\Common\TextureTools\MarchingSquares.cs" />
+    <Compile Include="FarseerPhysics\Common\TextureTools\Terrain.cs" />
+    <Compile Include="FarseerPhysics\Common\TextureTools\TextureConverter.cs" />
+    <Compile Include="FarseerPhysics\Common\Vector2.cs" />
+    <Compile Include="FarseerPhysics\Common\Vector3.cs" />
+    <Compile Include="FarseerPhysics\Common\Vertices.cs" />
+    <Compile Include="FarseerPhysics\Controllers\AbstractForceController.cs" />
+    <Compile Include="FarseerPhysics\Controllers\BuoyancyController.cs" />
+    <Compile Include="FarseerPhysics\Controllers\Controller.cs" />
+    <Compile Include="FarseerPhysics\Controllers\GravityController.cs" />
+    <Compile Include="FarseerPhysics\Controllers\SimpleWindForce.cs" />
+    <Compile Include="FarseerPhysics\Controllers\VelocityLimitController.cs" />
+    <Compile Include="FarseerPhysics\ConvertUnits.cs" />
+    <Compile Include="FarseerPhysics\DebugViewBase.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Body.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\BreakableBody.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\ContactManager.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Contacts\Contact.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Contacts\ContactSolver.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Fixture.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Island.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\AngleJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\DistanceJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\FixedMouseJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\FrictionJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\GearJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\Joint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\MotorJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\PrismaticJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\PulleyJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\RevoluteJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\RopeJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\WeldJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\Joints\WheelJoint.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\TimeStep.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\World.cs" />
+    <Compile Include="FarseerPhysics\Dynamics\WorldCallbacks.cs" />
+    <Compile Include="FarseerPhysics\Factories\BodyFactory.cs" />
+    <Compile Include="FarseerPhysics\Factories\FixtureFactory.cs" />
+    <Compile Include="FarseerPhysics\Factories\JointFactory.cs" />
+    <Compile Include="FarseerPhysics\Factories\LinkFactory.cs" />
+    <Compile Include="FarseerPhysics\Settings.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Physics\Figures\Base.cs" />
+    <Compile Include="Physics\Figures\Simple\CircleFigure.cs" />
+    <Compile Include="Physics\Figures\BaseComplexFigure.cs" />
+    <Compile Include="Physics\Figures\BaseFigure.cs" />
+    <Compile Include="Physics\Figures\Complex\Cross.cs" />
+    <Compile Include="Physics\Figures\Complex\HollowCircleWithInnerSpikes.cs" />
+    <Compile Include="Physics\Figures\Complex\HollowCircle.cs" />
+    <Compile Include="Physics\Figures\Complex\HollowRectangle.cs" />
+    <Compile Include="Physics\Figures\IComplexFigure.cs" />
+    <Compile Include="Physics\Figures\Simple\Triangle.cs" />
+    <Compile Include="Physics\Figures\Simple\Rectangle.cs" />
+    <Compile Include="Physics\Figures\Simple\Circle.cs" />
+    <Compile Include="Physics\Figures\IFigure.cs" />
+    <Compile Include="Physics\ObjectInfo.cs" />
+    <Compile Include="Physics\RenderingEngine.cs" />
+    <Compile Include="Physics\SceneUpdate.cs" />
+    <Compile Include="Physics\PWorld.cs" />
+    <Compile Include="Physics\Vector2.cs" />
+    <Compile Include="Physics\Vertices.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Startup.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="favicon.ico" />
+    <Content Include="Global.asax" />
+    <Content Include="index.html" />
+    <None Include="Properties\PublishProfiles\CanvasPlayground2505 - Web Deploy.pubxml" />
+    <Content Include="Scripts\jquery-1.10.2.min.js" />
+    <Content Include="Web.config" />
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <None Include="Properties\PublishProfiles\CanvasPlayground2506 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\CanvasPlayground2506.pubxml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.config" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>21920</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:21920/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target> -->
+</Project>
