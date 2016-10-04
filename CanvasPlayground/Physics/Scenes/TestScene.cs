@@ -22,32 +22,41 @@ namespace CanvasPlayground.Physics.Scenes
         {
             SceneTimer.RunSetup(new List<Tuple<int, Action>> {
                 new Tuple<int, Action>(500, () =>{
-                    _worldLoop.AddFigure(new CircleFigure(_worldLoop.World, 75, 400, 400,40));
+                    _worldLoop?.AddFigure(new CircleFigure(_worldLoop.World, 75, 400, 400,40));
                 }),
                 new Tuple<int, Action>(1000, () =>{
-                    _worldLoop.AddFigure(new CircleFigure(_worldLoop.World, 75, 600, 400,40));
+                    _worldLoop?.AddFigure(new CircleFigure(_worldLoop.World, 75, 600, 400,40));
                 }),
                 new Tuple<int, Action>(1500, () =>{
-                    _worldLoop.AddFigure(new CircleFigure(_worldLoop.World, 75, 600, 600,40));
+                    _worldLoop?.AddFigure(new CircleFigure(_worldLoop.World, 75, 600, 600,40));
                 }),
                 new Tuple<int, Action>(2500, () =>{
-                    _worldLoop.AddFigure(new CircleFigure(_worldLoop.World, 75, 400, 600,40));
+                    _worldLoop?.AddFigure(new CircleFigure(_worldLoop.World, 75, 400, 600,40));
                 }),
                 new Tuple<int, Action>(3500, () =>{
-                    _worldLoop.AddFigure(new Rectangle(_worldLoop.World, 600,20, 0.2f, 500,500));
+                    _worldLoop?.AddFigure(new Rectangle(_worldLoop.World, 600,20, 0.2f, 500,500));
                 }),
 
-                   new Tuple<int, Action>(10000, () =>{
-                    _worldLoop.AddFigure(new Rectangle(_worldLoop.World, 600,20, 0.2f, 500,500) {Static = true});
+                new Tuple<int, Action>(10000, () =>{
+                    _worldLoop?.AddFigure(new Rectangle(_worldLoop.World, 600,20, 0.2f, 500,500) {Static = true});
+                }),
+                new Tuple<int, Action>(20000, () =>{
+                    _worldLoop?.AddFigure(new Rectangle(_worldLoop.World, 600,20, -0.2f, 1500,500) {Static = true});
                 }),
             });
 
+            while (_worldLoop != null)
+            {
+                //Do something/wait for something/ react to stuff as long as the scene is active
+
+                Thread.Sleep(1000);
+            }
         }
 
 
         public void Stop()
         {
-
+            _worldLoop = null;
         }
 
         public void SendEvent(string eventString)
