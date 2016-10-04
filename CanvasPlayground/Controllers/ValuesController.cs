@@ -126,6 +126,19 @@ namespace CanvasPlayground.Controllers
                 return "OK";
             }
 
+            if (method.StartsWith("scene"))
+            {
+                var sceneName = method.Substring(5);
+                RenderingHub.Instance.SceneStart(sceneName);
+                return "OK";
+            }
+            if (method.StartsWith("event"))
+            {
+                var eventName = method.Substring(5);
+                RenderingHub.Instance.SceneEvent(eventName);
+                return "OK";
+            }
+
             return "no method found";
         }
 

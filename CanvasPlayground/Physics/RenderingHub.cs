@@ -4,10 +4,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 //using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 using CanvasPlayground.Models;
 using CanvasPlayground.Physics.Figures;
+using CanvasPlayground.Physics.Scenes;
+using CanvasPlayground.Utils;
 //using System.Threading;
 using FarseerPhysics;
 using FarseerPhysics.Collision.Shapes;
@@ -25,6 +29,7 @@ namespace CanvasPlayground.Physics
 
         public long FrameNo => _theWorldLoop.FrameNo;
 
+        private IScene _currentScene;
 
         //Misc
         Random _random = new Random();
@@ -49,6 +54,25 @@ namespace CanvasPlayground.Physics
 
             _theWorldLoop = new WorldLoop();
             _theWorldLoop.Start(new Vector2(0, 10), 20);
+        }
+
+        public void SceneStart(string name)
+        {
+            var type = Misc.GetTypesByName("TestScene");
+            _currentScene = (IScene)Activator.CreateInstance(type, _theWorldLoop);
+            Task.Run(() =>
+            {
+                _currentScene?.Start();
+            });
+        }
+
+        public void SceneEvent(string eventName)
+        {
+            Task.Run(() =>
+            {
+                _currentScene?.SendEvent(eventName);
+            });
+
         }
 
         public void SetWorldBox(int width, int height)
@@ -102,6 +126,7 @@ namespace CanvasPlayground.Physics
         {
             _theWorldLoop.AddComplexFigure(new HollowRectangle(_theWorldLoop.World, _width, _height, 25, _width / 2, _height / 2) { Restitution = 0.9f, Static = true, Density = 1f, Friction = 0, RotationPerSecond = 0.0f });
         }
+
 
         public void ReverseGravity()
         {
