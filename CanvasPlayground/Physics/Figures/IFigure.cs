@@ -1,19 +1,27 @@
-﻿using ChipmunkSharp;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using FarseerPhysics.Collision.Shapes;
+using FarseerPhysics.Common;
+using FarseerPhysics.Dynamics;
+using Microsoft.Xna.Framework;
 
 namespace CanvasPlayground.Physics.Figures
 {
     public interface IFigure
     {
         int Id { get; }
-        PWorld World { get; }
-        cpBody Body { get; }
-        cpShape Shape { get; }
-        //Fixture Fixture { get; }
+        World World { get; }
+        Body Body { get; }
+        Shape Shape { get; }
+        Fixture Fixture { get; }
         Vertices Vertices { get; }
         Vertices OriginalVertices { get; }
         int X { get; }
         int Y { get; }
-        //float Density { get; set; }
+        float Density { get; set; }
         float Mass { get; set; }
         float Restitution { get; set; }
         float Friction { get; set; }

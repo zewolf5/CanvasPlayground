@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using CanvasPlayground.Physics.Figures.Simple;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using FarseerPhysics;
+using FarseerPhysics.Common;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Factories;
+using Microsoft.Xna.Framework;
 
-namespace CanvasPlayground.Physics.Figures.Complex
+namespace CanvasPlayground.Physics.Figures
 {
     public class HollowCircleWithInnerSpikes : BaseComplexFigure
     {
 
-        public HollowCircleWithInnerSpikes(PWorld world, int radius, int borderSize, int x, int y) : base(world, x, y)
+        public HollowCircleWithInnerSpikes(World world, int radius, int borderSize, int x, int y) : base(world, x, y)
         {
 
             float[] angles;
@@ -33,12 +40,12 @@ namespace CanvasPlayground.Physics.Figures.Complex
                 if (lastFigure != null)
                 {
                     //JointFactory.CreateWeldJoint(world, figure1.Body, lastFigure.Body, Vector2.Zero, Vector2.Zero);
-                    //lastVector = circleVertex;
+                    lastVector = circleVertex;
                 }
                 else
                 {
                     firstFigure = figure1;
-                    //firstVector = circleVertex;
+                    firstVector = circleVertex;
                 }
 
                 lastFigure = figure1;
@@ -46,7 +53,7 @@ namespace CanvasPlayground.Physics.Figures.Complex
             //JointFactory.CreateWeldJoint(world, lastFigure.Body, firstFigure.Body, Vector2.Zero, Vector2.Zero);
 
 
-            Mass = 1f;
+            Density = 0.3f;
             Friction = 0;
             Restitution = 1;
         }

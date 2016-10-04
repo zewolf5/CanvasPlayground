@@ -1,13 +1,22 @@
-﻿using CanvasPlayground.Physics.Figures.Simple;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using FarseerPhysics;
+using FarseerPhysics.Common;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Factories;
+using Microsoft.Xna.Framework;
 
-namespace CanvasPlayground.Physics.Figures.Complex
+namespace CanvasPlayground.Physics.Figures
 {
     public class Cross : BaseComplexFigure
     {
         private int _originalWidth;
         private int _originalHeight;
 
-        public Cross(PWorld world, int width, int height, int borderSize, int x, int y) : base(world, x, y)
+        public Cross(World world, int width, int height, int borderSize, int x, int y) : base(world, x, y)
         {
             _originalWidth = width;
             _originalHeight = height;
@@ -18,10 +27,9 @@ namespace CanvasPlayground.Physics.Figures.Complex
             Figures.Add(rectVertices1);
             Figures.Add(rectVertices2);
 
-            //JointFactory.CreateWeldJoint(world, rectVertices1.Body, rectVertices2.Body, Vector2.Zero, Vector2.Zero);
+            JointFactory.CreateWeldJoint(world, rectVertices1.Body, rectVertices2.Body, Vector2.Zero, Vector2.Zero);
 
-            Mass = 1f;
-
+            Density = 1f;
             Friction = 0;
             Restitution = 1;
         }

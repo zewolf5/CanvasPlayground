@@ -1,28 +1,32 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using ChipmunkSharp;
+using System.Text;
+using System.Threading.Tasks;
 using FarseerPhysics;
+using FarseerPhysics.Collision.Shapes;
+using FarseerPhysics.Common;
+using FarseerPhysics.Dynamics;
+using Microsoft.Xna.Framework;
 
 namespace CanvasPlayground.Physics.Figures
 {
     public class BaseFigure : Base, IFigure
     {
-        public PWorld World { get; private set; }
-        public cpBody Body { get; private set; }
-        public cpShape Shape { get; private set; }
-        //public Fixture Fixture { get; private set; }
+        public World World { get; private set; }
+        public Body Body { get; private set; }
+        public Shape Shape { get; private set; }
+        public Fixture Fixture { get; private set; }
         public Vertices OriginalVertices { get; private set; }
 
         public Vertices Vertices
         {
             get
             {
-                if (Shape is cpPolyShape)
+                if (Shape is PolygonShape)
                 {
-                    //return RotateVerticesAndToDisplayUnits(((cpPolyShape)Shape).GetVertices().Select(o=>new Vector2(o.x, o.y)).ToList(), Body.Rotation);
-                    var pos = Body.GetPosition();
-                    return new Vertices(((cpPolyShape)Shape).GetVertices().Select(o => new Vector2(o.x - pos.x, o.y - pos.y)));
+                    return RotateVerticesAndToDisplayUnits(((PolygonShape)Shape).Vertices, Body.Rotation);
                 }
                 else
                 {
@@ -33,12 +37,18 @@ namespace CanvasPlayground.Physics.Figures
 
         public Vector2 Position
         {
-            get { return new Vector2((int)Body.GetPosition().x, (int)Body.GetPosition().y); }
+            get
+            {
+                return new Vector2() { X = (int)ConvertUnits.ToDisplayUnits(Body.Position.X), Y = (int)ConvertUnits.ToDisplayUnits(Body.Position.Y) };
+            }
         }
 
         public Vector2 LinearVelocity
         {
-            get { return new Vector2((int)Body.GetVelocity().x, (int)Body.GetVelocity().y); }
+            get
+            {
+                return new Vector2() { X = ConvertUnits.ToDisplayUnits(Body.LinearVelocity.X), Y = ConvertUnits.ToDisplayUnits(Body.LinearVelocity.Y) };
+            }
         }
 
         public int X { get; private set; }
@@ -59,156 +69,113 @@ namespace CanvasPlayground.Physics.Figures
             set { _htmlColor = value; }
         }
 
+        public float Density
+        {
+            get { return Shape.Density; }
+            set { Shape.Density = value; }
+        }
 
         public float Restitution
         {
-            get { return Shape.GetElasticity(); }
-            set { Shape.SetElasticity(value); }
+            get { return Fixture.Restitution; }
+            set { Fixture.Restitution = value; }
         }
 
         public float Friction
         {
-            get { return Shape.GetFriction(); }
-            set { Shape.SetFriction(value); }
+            get { return Fixture.Friction; }
+            set { Fixture.Friction = value; }
         }
 
         public float Mass
         {
-            get { return Body.GetMass(); }
-            set
-            {
-                if (Shape.GetBody().bodyType == cpBodyType.DYNAMIC)
-                {
-                    Body.SetMass(value);
-                }
-            }
+            get { return Body.Mass; }
+            set { Body.Mass = value; }
         }
 
         public bool Static
         {
-            get
-            {
-                return Shape.GetBody().bodyType == cpBodyType.STATIC;
-            }
-            set
-            {
-                if (Shape.GetBody().bodyType == cpBodyType.STATIC && !value)
-                {
-                    var oldPos = Body.GetPosition();
-                    var oldMass = Body.GetMass();
-                    var oldMoment = Body.GetMoment();
-                    World.Space.RemoveBody(Body);
-                    Body = World.Space.AddBody(new cpBody(oldMass, oldMoment));
-                    Body.SetPosition(oldPos);
-                    Shape.SetBody(Body);
-                }
-                else
-                {
-                    var oldPos = Body.GetPosition();
-                    World.Space.RemoveBody(Body);
-                    Body = World.Space.AddBody(cpBody.NewStatic());
-                    Body.SetPosition(oldPos);
-                    Shape.SetBody(Body);
-                }
-            }
+            get { return Body.IsStatic; }
+            set { Body.IsStatic = value; }
         }
 
         public bool SleepingAllowed
         {
-
-            get { return false; }
-            set { }
+            get { return Body.SleepingAllowed; }
+            set { Body.SleepingAllowed = value; }
         }
 
 
-        public BaseFigure(PWorld world, int x, int y)
+        public BaseFigure(World world, int x, int y)
         {
             World = world;
             X = x;
             Y = y;
         }
 
-        public void Create(int x, int y, Vertices shape, int radius = 1)
+        public void Create(int x, int y, Vertices shape, int radius = 0)
         {
+            var location = ConvertUnits.ToSimUnits(x, y);
 
-            float mass = 1;
-
-            float moment = cp.MomentForCircle(mass, 0, radius, cpVect.Zero);
-
-
-
-
-            //var location = ConvertUnits.ToSimUnits(x, y);
-
-            //Body = new Body(World, location, 0, 0);
-            //Body.BodyType = BodyType.Dynamic;
-            //Body.AngularVelocity = 0f;
-            //Body.Mass = 0.001f;
-            ////Body.LinearVelocity = new Vector2((float)(r.NextDouble() * 3f) - 1.5f, (float)(r.NextDouble() * 3f) - 1.5f);
-            ////Body.Restitution = restitution;
-            ////Body.Friction = friction;
+            Body = new Body(World, location, 0, 0);
+            Body.BodyType = BodyType.Dynamic;
+            Body.AngularVelocity = 0f;
+            Body.Mass = 0.001f;
+            //Body.LinearVelocity = new Vector2((float)(r.NextDouble() * 3f) - 1.5f, (float)(r.NextDouble() * 3f) - 1.5f);
+            //Body.Restitution = restitution;
+            //Body.Friction = friction;
 
 
             if (shape.Count <= 1)
             {
-                Body = World.Space.AddBody(new cpBody(mass, moment));
-                Body.SetPosition(new cpVect(x, y));
-                Body.SetVelocity(new cpVect((float)(r.NextDouble() * 100 - 50), (float)(r.NextDouble() * 100 - 50)));
                 //circle
-                Shape = World.Space.AddShape(new cpCircleShape(Body, radius, cpVect.Zero));
-                Shape.SetFriction(0.7f);
-                Shape.SetElasticity(0.5f);
-                Shape.SetCollisionType(1);
+                Shape = new CircleShape(ConvertUnits.ToSimUnits(radius), 0.3f);
             }
             else
             {
-                Body = World.Space.AddBody(new cpBody(mass, moment));
-                Body.SetPosition(new cpVect(x, y));
-
-                Shape = World.Space.AddShape(new cpPolyShape(Body, shape.Count, shape.Select(o => new cpVect(o.X, o.Y)).ToArray(), radius));
-                Shape.SetFriction(0.7f);
-                Shape.SetCollisionType(1);
+                Shape = new PolygonShape(shape, 1f);
             }
 
-            //try
-            //{
-            //    Fixture = Body.CreateFixture(Shape);
-            //}
-            //catch (Exception)
-            //{
+            try
+            {
+                Fixture = Body.CreateFixture(Shape);
+            }
+            catch (Exception)
+            {
 
-            //    throw;
-            //}
-            ////Fixture.Restitution = restitution;
-            ////Fixture.Friction = friction;
+                throw;
+            }
+            //Fixture.Restitution = restitution;
+            //Fixture.Friction = friction;
 
-            //OriginalVertices = shape;
+            OriginalVertices = shape;
 
         }
 
         public void Clear()
         {
-            World.Space.RemoveBody(Body);
-            World.Space.RemoveShape(Shape);
+            World.RemoveBody(Body);
+            Body.Dispose();
+            Fixture.Dispose();
         }
 
         public bool IsOutOfBounds
         {
-            get { return Body.GetPosition().x < -1000 || Body.GetPosition().x > 4000 || Body.GetPosition().y < -1000 || Body.GetPosition().y > 3000; }
+            get { return Body.Position.X < -10 || Body.Position.X > 30 || Body.Position.Y < -10 || Body.Position.Y > 40; }
         }
 
         internal Vertices RotateVerticesAndToDisplayUnits(Vertices verts, float angle)
         {
             var list = new Vertices();
 
-            //Matrix rotation = Matrix.Identity;
-            //rotation *= Matrix.CreateRotationZ(angle);
-            //for (int i = 0; i < verts.Count; i++)
-            //{
-            //    var vector = ConvertUnits.ToDisplayUnits(verts[i]);
-            //    vector = Vector2.Transform(vector, rotation);
-            //    list.Add(new Vector2((int)vector.X, (int)vector.Y));
-            //}
+            Matrix rotation = Matrix.Identity;
+            rotation *= Matrix.CreateRotationZ(angle);
+            for (int i = 0; i < verts.Count; i++)
+            {
+                var vector = ConvertUnits.ToDisplayUnits(verts[i]);
+                vector = Vector2.Transform(vector, rotation);
+                list.Add(new Vector2((int)vector.X, (int)vector.Y));
+            }
             return list;
         }
 
@@ -216,14 +183,14 @@ namespace CanvasPlayground.Physics.Figures
         {
             var list = new Vertices();
 
-            //Matrix rotation = Matrix.Identity;
-            //rotation *= Matrix.CreateRotationZ(angle);
-            //for (int i = 0; i < verts.Count; i++)
-            //{
-            //    var vector = verts[i];
-            //    vector = Vector2.Transform(vector, rotation);
-            //    list.Add(new Vector2(vector.X, vector.Y));
-            //}
+            Matrix rotation = Matrix.Identity;
+            rotation *= Matrix.CreateRotationZ(angle);
+            for (int i = 0; i < verts.Count; i++)
+            {
+                var vector = verts[i];
+                vector = Vector2.Transform(vector, rotation);
+                list.Add(new Vector2(vector.X, vector.Y));
+            }
             return list;
         }
     }

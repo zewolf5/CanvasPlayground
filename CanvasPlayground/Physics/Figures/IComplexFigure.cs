@@ -1,6 +1,12 @@
-﻿using System.Collections.Generic;
-using ChipmunkSharp;
-
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using FarseerPhysics.Collision.Shapes;
+using FarseerPhysics.Common;
+using FarseerPhysics.Dynamics;
+using Microsoft.Xna.Framework;
 
 namespace CanvasPlayground.Physics.Figures
 {
@@ -8,14 +14,14 @@ namespace CanvasPlayground.Physics.Figures
     {
         int Id { get; }
 
-        PWorld World { get; }
+        World World { get; }
 
         List<IFigure> Figures { get; }
 
         int X { get; }
         int Y { get; }
         float Mass { get; set; }
-        //float Density { get; set; }
+        float Density { get; set; }
         float Restitution { get; set; }
         float Friction { get; set; }
         bool Static { get; set; }

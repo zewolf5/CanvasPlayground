@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ChipmunkSharp;
 using FarseerPhysics;
 using FarseerPhysics.Collision.Shapes;
 using FarseerPhysics.Common;
@@ -16,7 +15,7 @@ namespace CanvasPlayground.Physics.Figures
     public class BaseComplexFigure : Base, IComplexFigure
     {
         public int Id { get; }
-        public PWorld World { get; }
+        public World World { get; }
         public List<IFigure> Figures { get; } = new List<IFigure>();
         public int X { get; }
         public int Y { get; }
@@ -34,16 +33,16 @@ namespace CanvasPlayground.Physics.Figures
                 
                 foreach (var figure in Figures)
                 {
-                    //var posO = figure.Body.Position;
-                    //var pos = ConvertUnits.ToDisplayUnits(posO);
-                    ////figure.Body.SetTransform(pos, _currentAngle);
-                    //figure.Body.SetTransform(Vector2.Zero, _currentAngle);
-                    //figure.Body.SetTransform(posO, _currentAngle);
+                    var posO = figure.Body.Position;
+                    var pos = ConvertUnits.ToDisplayUnits(posO);
+                    //figure.Body.SetTransform(pos, _currentAngle);
+                    figure.Body.SetTransform(Vector2.Zero, _currentAngle);
+                    figure.Body.SetTransform(posO, _currentAngle);
 
-                    //var vec = new Vector2(pos.X - X, pos.Y - Y);
-                    //var pos2 = RotateVector2(vec, stepAngle);
-                    //var vec2 = new Vector2(pos2.X + X, pos2.Y + Y);
-                    //figure.Body.Position = ConvertUnits.ToSimUnits(vec2);
+                    var vec = new Vector2(pos.X - X, pos.Y - Y);
+                    var pos2 = RotateVector2(vec, stepAngle);
+                    var vec2 = new Vector2(pos2.X + X, pos2.Y + Y);
+                    figure.Body.Position = ConvertUnits.ToSimUnits(vec2);
                     
                     //figure.Body.SetTransform(Vector2.Zero, _currentAngle);
                 }
@@ -60,14 +59,33 @@ namespace CanvasPlayground.Physics.Figures
             }
         }
 
-        public BaseComplexFigure(PWorld world, int x, int y)
+        public BaseComplexFigure(World world, int x, int y)
         {
             World = world;
             X = x;
             Y = y;
         }
 
-    
+        public float Density
+        {
+            get
+            {
+                foreach (var figure in Figures)
+                {
+                    return figure.Density;
+                }
+                return 0;
+            }
+            set
+            {
+                foreach (var figure in Figures)
+                {
+                    figure.Density = value;
+                }
+            }
+
+
+        }
 
         public float Mass
         {
@@ -183,7 +201,7 @@ namespace CanvasPlayground.Physics.Figures
             {
                 foreach (var figure in Figures)
                 {
-                    //return figure.LinearVelocity;
+                    return figure.LinearVelocity;
                 }
                 return Vector2.Zero;
             }
