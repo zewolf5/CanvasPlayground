@@ -240,11 +240,44 @@ namespace CanvasPlayground.Physics
             }
         }
 
-
-        public void RemoveItem(IFigure removeItem)
+        public void AddFigure(IFigure figure)
         {
-            lock(_syncClearItem) removeItem.Clear();
+            lock (_syncClearItem) Figures.Add(figure);
         }
 
+
+        public void RemoveFigure(IFigure removeItem)
+        {
+            lock (_syncClearItem) removeItem.Clear();
+        }
+
+
+        public void AddComplexFigure(IComplexFigure figure)
+        {
+            lock (_syncClearItem) CFigures.Add(figure);
+        }
+
+
+        public void RemoveComplexFigure(IComplexFigure removeItem)
+        {
+            lock (_syncClearItem) removeItem.Clear();
+        }
+
+        public void RemoveLast10()
+        {
+            IEnumerable<IFigure> removes = null;
+            lock (Figures) removes = Figures.AsEnumerable().Reverse().Take(10);
+
+            Debug.WriteLine($"Removing items: {removes.Count()}/{Figures.Count}");
+            lock (Figures)
+            {
+                foreach (var remove in removes)
+                {
+                    RemoveFigure(remove);
+                    Figures.Remove(remove);
+                }
+
+            }
+        }
     }
 }

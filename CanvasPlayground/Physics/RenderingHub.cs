@@ -100,7 +100,7 @@ namespace CanvasPlayground.Physics
 
         public void CreateWorldBox()
         {
-            lock (_theWorldLoop.CFigures) _theWorldLoop.CFigures.Add(new HollowRectangle(_theWorldLoop.World, _width, _height, 25, _width / 2, _height / 2) { Restitution = 0.9f, Static = true, Density = 1f, Friction = 0, RotationPerSecond = 0.0f });
+            _theWorldLoop.AddComplexFigure(new HollowRectangle(_theWorldLoop.World, _width, _height, 25, _width / 2, _height / 2) { Restitution = 0.9f, Static = true, Density = 1f, Friction = 0, RotationPerSecond = 0.0f });
         }
 
         public void ReverseGravity()
@@ -110,62 +110,49 @@ namespace CanvasPlayground.Physics
 
         public void AddRandomBall()
         {
-            lock (_theWorldLoop.Figures) _theWorldLoop.Figures.Add(new Circle(_theWorldLoop.World, 15, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, SleepingAllowed = false });
+            _theWorldLoop.AddFigure(new Circle(_theWorldLoop.World, 15, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, SleepingAllowed = false });
         }
         public void AddBall(int x, int y)
         {
-            lock (_theWorldLoop.Figures) _theWorldLoop.Figures.Add(new Circle(_theWorldLoop.World, 15, x, y) { Restitution = 0.95f, SleepingAllowed = false });
+            _theWorldLoop.AddFigure(new Circle(_theWorldLoop.World, 15, x, y) { Restitution = 0.95f, SleepingAllowed = false });
         }
 
 
         public void AddRect()
         {
-            lock (_theWorldLoop.Figures) _theWorldLoop.Figures.Add(new Rectangle(_theWorldLoop.World, 40, 40, 0, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f });
+            _theWorldLoop.AddFigure(new Rectangle(_theWorldLoop.World, 40, 40, 0, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f });
         }
 
 
 
         public void AddTriangle()
         {
-            lock (_theWorldLoop.Figures) _theWorldLoop.Figures.Add(new Triangle(_theWorldLoop.World, 100, 100, 100, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, Mass = 1f });
+            _theWorldLoop.AddFigure(new Triangle(_theWorldLoop.World, 100, 100, 100, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, Mass = 1f });
         }
 
 
         public void BigWheel()
         {
 
-            lock (_theWorldLoop.CFigures) _theWorldLoop.CFigures.Add(
+            _theWorldLoop.AddComplexFigure(
                 new HollowCircleWithInnerSpikes(_theWorldLoop.World, _height / 2, 25, _width / 2, _height / 2)
                 { Restitution = 0.25f, Static = true, RotationPerSecond = 0.7f });
         }
 
         public void CreateCross()
         {
-            lock (_theWorldLoop.CFigures) _theWorldLoop.CFigures.Add(new Cross(_theWorldLoop.World, 40, 40, 5, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f });
+            _theWorldLoop.AddComplexFigure(new Cross(_theWorldLoop.World, 40, 40, 5, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f });
         }
 
         public void CreateStuff()
         {
-            lock (_theWorldLoop.CFigures) _theWorldLoop.CFigures.Add(new HollowCircle(_theWorldLoop.World, 140, 25, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, Static = true, RotationPerSecond = 0.1f });
+            _theWorldLoop.AddComplexFigure(new HollowCircle(_theWorldLoop.World, 140, 25, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, Static = true, RotationPerSecond = 0.1f });
 
         }
 
         public void RemoveLastItem()
         {
-
-            IEnumerable<IFigure> removes = null;
-            lock (_theWorldLoop.Figures) removes = _theWorldLoop.Figures.AsEnumerable().Reverse().Take(10);
-
-            Debug.WriteLine($"Removing items: {removes.Count()}/{_theWorldLoop.Figures.Count}");
-            lock (_theWorldLoop.Figures)
-            {
-                foreach (var remove in removes)
-                {
-                    _theWorldLoop.RemoveItem(remove);
-                    _theWorldLoop.Figures.Remove(remove);
-                }
-
-            }
+            _theWorldLoop.RemoveLast10();
         }
     }
 
