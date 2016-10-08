@@ -24,11 +24,12 @@
     <a href="#" onclick="runAjaxMethod('bigWheel');">Wheel of Fortune</a>
     <a href="#" onclick="runAjaxMethod('add10Ball');">Add 10 Balls</a>
     <a href="#" onclick="runAjaxMethod('removeItem');">Remove Last 10</a>
-    <a href="#" onclick="runAjaxMethod('sceneTestScene');">Start Test Scene</a>
+    <a href="#" onclick="runAjaxMethod('sceneWoF3Scene');">Start Test Scene</a>
+    <a href="#" onclick="runAjaxMethod('eventDropTheBalls');">Drop Balls</a>
     <a href="#" onclick="runAjaxMethod('eventSomeEvent');">Event to Test Scene</a>
 
 
-    <div style=""><input type="checkbox" checked id="checky" style="height: 30px; width: 30px;display:inline-block" value="0" /></div>
+    <div style=""><input type="checkbox" id="checky" style="height: 30px; width: 30px;display:inline-block" value="0" /></div>
     <div style="display:inline-block">Server polling time: <input type="text" id="adjust" style="display:inline-block" /></div>
     <div id="text" style="display: inline-block">-1</div>
     <div id="fps" style="display: inline-block">-1</div>
@@ -45,11 +46,15 @@
     <script id="chess board" type="text/javascript">
 
 
-        $(function () {
+        startStream();
+
+        function startStream() {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', '/api/values?method=getObjectsStream', true);
             xhr.send(null);
             var timer;
+            var startStreamTime = +new Date;
+            
             timer = window.setInterval(function () {
                 if (xhr.readyState == XMLHttpRequest.DONE) {
                     window.clearTimeout(timer);
@@ -58,10 +63,16 @@
                 //$('body').append('state: ' + xhr.readyState + '<br />');
                 //$('body').append('data: ' + xhr.responseText + '<br />');
                 parseStream(xhr.responseText);
-
+                var nowTime = +new Date;
+                if (nowTime - startStreamTime > 30000) {
+                    //Start new stream;
+                    xhr.abort();
+                    startStream();
+                    timer.stop();
+                }
             }, 10);
 
-        });
+        }
 
         function parseStream(text) {
             var items = text.split('\n\n');
@@ -221,6 +232,7 @@
                     }
 
                     renderBallsNStuff(itemsObject);  //Draw all the objects
+                    renderTextInfo(lastSceneObject.Info);
 
                 }
             }
@@ -235,20 +247,28 @@
                     } else {
                         drawCircle(itemsObject[i].P.X, itemsObject[i].P.Y, itemsObject[i].C);
                     }
-                    if ((itemsObject[i].I + "").length == 4) {
-                        drawText(itemsObject[i].P.X - 20, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                    } else if ((itemsObject[i].I + "").length == 3) {
-                        drawText(itemsObject[i].P.X - 15, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                    } else if ((itemsObject[i].I + "").length == 2) {
-                        drawText(itemsObject[i].P.X - 10, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                    } else {
-                        drawText(itemsObject[i].P.X - 5, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                    }
+                    //if ((itemsObject[i].I + "").length == 4) {
+                    //    drawText(itemsObject[i].P.X - 20, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                    //} else if ((itemsObject[i].I + "").length == 3) {
+                    //    drawText(itemsObject[i].P.X - 15, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                    //} else if ((itemsObject[i].I + "").length == 2) {
+                    //    drawText(itemsObject[i].P.X - 10, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                    //} else {
+                    //    drawText(itemsObject[i].P.X - 5, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                    //}
                 }
             }
         }
 
-
+        function renderTextInfo(textInfos) {
+            for (var i = 0; i < textInfos.length; i++) {
+                var textInfo = textInfos[i];
+                context.font = textInfo.S + "px " + textInfo.F;
+                context.fillStyle = "black";
+                context.fillText(textInfo.T, textInfo.P.X, textInfo.P.Y);
+                //alert(textInfo.T);
+            }
+        }
 
         //$("#adjust").val(200);
         setClientRectangle();

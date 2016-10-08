@@ -13,12 +13,21 @@ namespace CanvasPlayground.Physics.Figures
     public class Triangle : BaseFigure
     {
 
-        public Triangle(World world, int side, int side2, int side3, int x, int y) : base(world,x,y)
+        public Triangle(World world, float factor, float angle, int x, int y, string color = null, bool? isStatic = null) : base(world,x,y,color)
         {
 
-            var rectVertices = CreateTriangle(side, side2, side3);
-            Create(x, y, rectVertices);
+            var rectVertices = CreateTriangle(0, 0, 0);
 
+            rectVertices = RotateVertices(rectVertices, angle);
+            for (int i = 0; i < rectVertices.Count; i++)
+            {
+                rectVertices[i] *= factor;
+
+            }
+
+            Create(x, y, rectVertices,null, isStatic);
+
+            
             Density = 0.3f;
             Friction = 0;
             Restitution = 1;

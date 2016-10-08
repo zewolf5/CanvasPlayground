@@ -35,10 +35,9 @@ namespace CanvasPlayground.Physics.Figures
         void Clear();
 
         bool IsOutOfBounds { get; }
-        string HtmlColor { get; }
+        string HtmlColor { get; set; }
 
-        Vector2 Position { get; }
-        Vector2 LinearVelocity { get; }
-
+        Vector2 Position { get; set; }
+        Vector2 LinearVelocity { get; set; }
     }
 }

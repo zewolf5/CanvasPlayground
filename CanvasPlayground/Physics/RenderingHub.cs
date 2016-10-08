@@ -59,10 +59,11 @@ namespace CanvasPlayground.Physics
         public void SceneStart(string name)
         {
             var type = Misc.GetTypesByName(name);
-            _currentScene?.Stop();
-            _currentScene = (IScene)Activator.CreateInstance(type, _theWorldLoop);
             Task.Run(() =>
             {
+                _currentScene?.Stop();
+                _theWorldLoop.Start();
+                _currentScene = (IScene)Activator.CreateInstance(type, _theWorldLoop);
                 _currentScene?.Start();
             });
         }
@@ -84,8 +85,8 @@ namespace CanvasPlayground.Physics
 
         public void Stop()
         {
-            _theWorldLoop.Stop();
             _currentScene?.Stop();
+            _theWorldLoop.Stop();
         }
 
         public void Start()
@@ -124,9 +125,19 @@ namespace CanvasPlayground.Physics
 
         }
 
+        public IEnumerable<Info> GetInfos()
+        {
+            List<Info> infos;
+            lock (_theWorldLoop.CFigures) infos = _theWorldLoop.TextInfos.ToList();
+            foreach (var info in infos)
+            {
+                yield return info;
+            }
+        }
+
         public void CreateWorldBox()
         {
-            _theWorldLoop.AddComplexFigure(new HollowRectangle(_theWorldLoop.World, _width, _height, 25, _width / 2, _height / 2) { Restitution = 0.9f, Static = true, Density = 1f, Friction = 0, RotationPerSecond = 0.0f });
+            _theWorldLoop.CreateComplexFigure(() => new HollowRectangle(_theWorldLoop.World, _width, _height, 25, _width / 2, _height / 2) { Restitution = 0.9f, Static = true, Density = 1f, Friction = 0, RotationPerSecond = 0.0f });
         }
 
 
@@ -137,43 +148,43 @@ namespace CanvasPlayground.Physics
 
         public void AddRandomBall()
         {
-            _theWorldLoop.AddFigure(new Circle(_theWorldLoop.World, 15, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, SleepingAllowed = false });
+            _theWorldLoop.CreateFigure(() => new Circle(_theWorldLoop.World, 15, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, SleepingAllowed = false });
         }
         public void AddBall(int x, int y)
         {
-            _theWorldLoop.AddFigure(new Circle(_theWorldLoop.World, 15, x, y) { Restitution = 0.95f, SleepingAllowed = false });
+            _theWorldLoop.CreateFigure(() => new Circle(_theWorldLoop.World, 15, x, y) { Restitution = 0.1f, SleepingAllowed = false });
         }
 
 
         public void AddRect()
         {
-            _theWorldLoop.AddFigure(new Rectangle(_theWorldLoop.World, 40, 40, 0, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f });
+            _theWorldLoop.CreateFigure(() => new Rectangle(_theWorldLoop.World, 40, 40, 0, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f });
         }
 
 
 
         public void AddTriangle()
         {
-            _theWorldLoop.AddFigure(new Triangle(_theWorldLoop.World, 100, 100, 100, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, Mass = 1f });
+            _theWorldLoop.CreateFigure(() => new Triangle(_theWorldLoop.World, 1f, (float)_random.NextDouble(), _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, Mass = 1f });
         }
 
 
         public void BigWheel()
         {
 
-            _theWorldLoop.AddComplexFigure(
-                new HollowCircleWithInnerSpikes(_theWorldLoop.World, _height / 2, 25, _width / 2, _height / 2)
-                { Restitution = 0.25f, Static = true, RotationPerSecond = 0.7f });
+            //_theWorldLoop.AddComplexFigure(
+            //    new HollowCircleWithInnerSpikes(_theWorldLoop.World, _height / 2, 25, _width / 2, _height / 2)
+            //    { Restitution = 0.25f, Static = true, RotationPerSecond = 0.7f });
         }
 
         public void CreateCross()
         {
-            _theWorldLoop.AddComplexFigure(new Cross(_theWorldLoop.World, 40, 40, 5, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f });
+            _theWorldLoop.CreateComplexFigure(() => new Cross(_theWorldLoop.World, 40, 40, 5, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f });
         }
 
         public void CreateStuff()
         {
-            _theWorldLoop.AddComplexFigure(new HollowCircle(_theWorldLoop.World, 140, 25, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, Static = true, RotationPerSecond = 0.1f });
+            _theWorldLoop.CreateComplexFigure(() => new HollowCircle(_theWorldLoop.World, 140, 25, _random.Next(_width), _random.Next(_height)) { Restitution = 0.95f, Static = true, RotationPerSecond = 0.1f });
 
         }
 

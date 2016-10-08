@@ -123,6 +123,7 @@
       <Private>True</Private>
       <HintPath>..\packages\Antlr.3.4.1.9004\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="EntityFramework">
@@ -274,6 +275,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Info.cs" />
     <Compile Include="Physics\Figures\Base.cs" />
     <Compile Include="Physics\Figures\Simple\CircleFigure.cs" />
     <Compile Include="Physics\Figures\BaseComplexFigure.cs" />
@@ -291,6 +293,7 @@
     <Compile Include="Physics\RenderingHub.cs" />
     <Compile Include="Models\SceneUpdate.cs" />
     <Compile Include="Physics\Scenes\IScene.cs" />
+    <Compile Include="Physics\Scenes\WoF3Scene.cs" />
     <Compile Include="Physics\Scenes\TestScene.cs" />
     <Compile Include="Physics\WorldLoop.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

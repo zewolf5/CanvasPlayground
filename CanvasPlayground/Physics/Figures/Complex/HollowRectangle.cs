@@ -16,7 +16,7 @@ namespace CanvasPlayground.Physics.Figures
         private int _originalWidth;
         private int _originalHeight;
 
-        public HollowRectangle(World world, int width, int height, int borderSize, int x, int y) : base(world, x, y)
+        public HollowRectangle(World world, int width, int height, int borderSize, int x, int y, string color = null, bool? isStatic = null) : base(world, x, y, color)
         {
             _originalWidth = width;
             _originalHeight = height;
@@ -24,10 +24,10 @@ namespace CanvasPlayground.Physics.Figures
             int halfX = width / 2;
             int halfY = height / 2;
 
-            var figure1 = new Rectangle(world, width, borderSize, 0, x, y - halfY);
-            var figure2 = new Rectangle(world, borderSize, height, 0, x - halfX, y);
-            var figure3 = new Rectangle(world, width, borderSize, 0, x, y + halfY);
-            var figure4 = new Rectangle(world, borderSize, height, 0, x + halfX, y);
+            var figure1 = new Rectangle(world, width, borderSize, 0, x, y - halfY, color, isStatic);
+            var figure2 = new Rectangle(world, borderSize, height, 0, x - halfX, y, color, isStatic);
+            var figure3 = new Rectangle(world, width, borderSize, 0, x, y + halfY, color, isStatic);
+            var figure4 = new Rectangle(world, borderSize, height, 0, x + halfX, y, color, isStatic);
 
             Figures.Add(figure1);
             Figures.Add(figure2);

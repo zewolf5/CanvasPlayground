@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
+using CanvasPlayground.Models;
 using CanvasPlayground.Physics.Figures;
 using FarseerPhysics.Dynamics;
 using Microsoft.Xna.Framework;
@@ -16,6 +18,7 @@ namespace CanvasPlayground.Physics
         //2 lists of all the objects
         public List<IFigure> Figures { get; private set; }
         public List<IComplexFigure> CFigures { get; private set; }
+        public List<Info> TextInfos { get; private set; }
 
         //Frame counter
         public long FrameNo { get; internal set; }
@@ -26,24 +29,43 @@ namespace CanvasPlayground.Physics
         private Thread _thread;
         private DateTime _lastRun = DateTime.MinValue;
 
-        private Thread _stepThread = null;
-        private Action _doStepWork = null;
-        private bool _stepWorkDone = false;
+
+        //private Thread _stepThread = null;
+
+        //private Action _doStepWork = null;
+        //private bool _stepWorkDone = false;
         private Vector2 _gravity;
 
         private static object _locker = new object();
-        private static object _syncClearItem = new object();
+        //private static object _syncClearItem = new object();
 
+        public float WorldFriction { get; set; } = 0f;
 
         public World World { get; private set; }
 
+        private System.Windows.Threading.Dispatcher _worldDispatcher;
+
+        public WorldLoop()
+        {
+            ManualResetEvent dispatcherReadyEvent = new ManualResetEvent(false);
+
+            new Thread(new ThreadStart(() =>
+            {
+                _worldDispatcher = Dispatcher.CurrentDispatcher;
+                dispatcherReadyEvent.Set();
+                Dispatcher.Run();
+            })).Start();
+
+            dispatcherReadyEvent.WaitOne();
+        }
 
         public void Start(Vector2 gravity, int sleepDuration)
         {
             _gravity = gravity;
             Figures = new List<IFigure>();
             CFigures = new List<IComplexFigure>();
-
+            TextInfos = new List<Info>();
+            World = new World(_gravity);
         }
 
         public void Start()
@@ -63,12 +85,12 @@ namespace CanvasPlayground.Physics
         {
             _runEngine = false;
             _thread?.Abort();
-            _stepThread?.Abort();
+            //_stepThread?.Abort();
             IEnumerable<IFigure> figures;
             lock (Figures) figures = Figures.ToList();
             foreach (var figure in figures)
             {
-                lock (_syncClearItem) figure.Clear();
+                RemoveFigure(figure);
             }
             Figures.Clear();
 
@@ -76,13 +98,15 @@ namespace CanvasPlayground.Physics
             lock (Figures) cfigures = CFigures.ToList();
             foreach (var figure in cfigures)
             {
-                lock (_syncClearItem) figure.Clear();
+                RemoveComplexFigure(figure);
             }
             CFigures.Clear();
 
+            TextInfos.Clear();
+
             _thread?.Abort();
-            _stepThread?.Abort();
-            _stepThread = null;
+            //_stepThread?.Abort();
+            //_stepThread = null;
         }
 
 
@@ -132,8 +156,7 @@ namespace CanvasPlayground.Physics
             {
                 if (figure.IsOutOfBounds)
                 {
-                    lock (_syncClearItem) figure.Clear();
-                    lock (Figures) Figures.Remove(figure);
+                    RemoveFigure(figure);
                     Debug.WriteLine($"REMOVED OUT OF PLACE BALL");
                 }
             }
@@ -144,8 +167,7 @@ namespace CanvasPlayground.Physics
             {
                 if (figure.IsOutOfBounds)
                 {
-                    lock (_syncClearItem) figure.Clear();
-                    lock (CFigures) CFigures.Remove(figure);
+                    RemoveComplexFigure(figure); 
                     Debug.WriteLine($"REMOVED OUT OF PLACE BALL");
                 }
             }
@@ -155,20 +177,10 @@ namespace CanvasPlayground.Physics
 
         private void DoTheStepTimeout(float time)
         {
-            lock (_locker)
-            {
-                if (_stepThread == null)
-                {
-                    _stepThread = new Thread(StepLoop);
-                    _stepThread.IsBackground = true;
-                    _stepThread.Start();
-                }
-            }
 
-            _stepWorkDone = false;
             var sw = Stopwatch.StartNew();
 
-            _doStepWork = () =>
+            _worldDispatcher.Invoke(() =>
             {
                 World.Step(time);
 
@@ -178,69 +190,50 @@ namespace CanvasPlayground.Physics
                 {
                     figure.Step(time);
                 }
-            };
-
-
-            while (!_stepWorkDone)
-            {
-                Thread.Sleep(1);
-                if (sw.ElapsedMilliseconds > 5000)
+                if (WorldFriction != 1f)
                 {
-                    Debug.WriteLine("ABORT SLOW CALC!");
-
-                    IEnumerable<IFigure> removes;
-                    lock (Figures) removes = Figures.AsEnumerable().Reverse().Take(Figures.Count / 10);
-                    Debug.WriteLine($"Removing items: {removes.Count()}/{Figures.Count}");
-                    lock (Figures)
+                    IEnumerable<IFigure> figures;
+                    lock (Figures) figures = Figures.ToList();
+                    foreach (var figure in figures)
                     {
-                        lock (_syncClearItem)
-                        {
-                            foreach (var remove in removes)
-                            {
-                                remove.Clear();
-                                Figures.Remove(remove);
-                            }
-                        }
-                    }
-                    _stepThread?.Abort();
-                    _stepThread = null;
-                    break;
-                }
-            }
-
-        }
-
-
-        private void StepLoop()
-        {
-            try
-            {
-                while (_runEngine)
-                {
-                    Thread.Sleep(5);
-                    var action = _doStepWork;
-                    if (action != null)
-                    {
-                        _doStepWork = null;
-
-                        lock (_syncClearItem) action();
-
-                        _stepWorkDone = true;
+                        figure.LinearVelocity *= (1f - WorldFriction);
                     }
                 }
-            }
-            catch (ThreadAbortException ex)
-            {
-                _stepThread = null;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error Step: {ex.Message}");
-                _stepThread = null;
-            }
-        }
 
-        public void AddFigure(IFigure figure)
+            });
+
+    
+
+            //while (!_stepWorkDone)
+            //{
+            //    Thread.Sleep(1);
+            //    if (sw.ElapsedMilliseconds > 35000)
+            //    {
+            //        Debug.WriteLine("ABORT SLOW CALC!");
+
+            //        IEnumerable<IFigure> removes;
+            //        lock (Figures) removes = Figures.AsEnumerable().Reverse().Take(Figures.Count / 10);
+            //        Debug.WriteLine($"Removing items: {removes.Count()}/{Figures.Count}");
+            //        lock (Figures)
+            //        {
+            //            lock (_syncClearItem)
+            //            {
+            //                foreach (var remove in removes)
+            //                {
+            //                    remove.Clear();
+            //                    Figures.Remove(remove);
+            //                }
+            //            }
+            //        }
+            //        _stepThread?.Abort();
+            //        _stepThread = null;
+            //        break;
+            //    }
+            //}
+
+        }
+    
+        private void AddFigure(IFigure figure)
         {
             lock (Figures) Figures.Add(figure);
         }
@@ -248,12 +241,15 @@ namespace CanvasPlayground.Physics
 
         public void RemoveFigure(IFigure removeItem)
         {
-            lock (_syncClearItem) removeItem.Clear();
+            _worldDispatcher.Invoke(() =>
+            {
+                if (!removeItem.Body.IsDisposed) removeItem.Clear();
+            });
             lock (Figures) Figures.Remove(removeItem);
         }
 
 
-        public void AddComplexFigure(IComplexFigure figure)
+        private void AddComplexFigure(IComplexFigure figure)
         {
             lock (CFigures) CFigures.Add(figure);
         }
@@ -261,7 +257,7 @@ namespace CanvasPlayground.Physics
 
         public void RemoveComplexFigure(IComplexFigure removeItem)
         {
-            lock (_syncClearItem) removeItem.Clear();
+            _worldDispatcher.Invoke(() => { removeItem.Clear(); });
             lock (CFigures) CFigures.Remove(removeItem);
         }
 
@@ -271,15 +267,34 @@ namespace CanvasPlayground.Physics
             lock (Figures) removes = Figures.AsEnumerable().Reverse().Take(10);
 
             Debug.WriteLine($"Removing items: {removes.Count()}/{Figures.Count}");
-            lock (Figures)
+            _worldDispatcher.Invoke(() =>
             {
                 foreach (var remove in removes)
                 {
                     RemoveFigure(remove);
-                    Figures.Remove(remove);
                 }
-
-            }
+            });
         }
+
+        public IFigure CreateFigure(Func<IFigure> figureCreation)
+        {
+            return _worldDispatcher.Invoke(() =>
+            {
+                var figure = figureCreation?.Invoke();
+                if (figure != null) AddFigure(figure);
+                return figure;
+            });
+        }
+
+        public IComplexFigure CreateComplexFigure(Func<IComplexFigure> figureCreation)
+        {
+            return _worldDispatcher.Invoke(() =>
+            {
+                var figure = figureCreation?.Invoke();
+                if (figure != null) AddComplexFigure(figure);
+                return figure;
+            });
+        }
+
     }
 }

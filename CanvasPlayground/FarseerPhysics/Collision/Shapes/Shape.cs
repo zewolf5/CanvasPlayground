@@ -130,6 +130,8 @@ namespace FarseerPhysics.Collision.Shapes
             ShapeType = ShapeType.Unknown;
         }
 
+        public object Tag { get; set; }
+
         /// <summary>
         /// Contains the properties of the shape such as:
         /// - Area of the shape

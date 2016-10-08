@@ -16,13 +16,13 @@ namespace CanvasPlayground.Physics.Figures
         private int _originalWidth;
         private int _originalHeight;
 
-        public Cross(World world, int width, int height, int borderSize, int x, int y) : base(world, x, y)
+        public Cross(World world, int width, int height, int borderSize, int x, int y, string color = null, bool? isStatic = null) : base(world, x, y, color)
         {
             _originalWidth = width;
             _originalHeight = height;
 
-            var rectVertices1 = new Rectangle(world, width, borderSize, 0, x, y);
-            var rectVertices2 = new Rectangle(world, borderSize, height, 0, x, y);
+            var rectVertices1 = new Rectangle(world, width, borderSize, 0, x, y, color, isStatic);
+            var rectVertices2 = new Rectangle(world, borderSize, height, 0, x, y, color, isStatic);
 
             Figures.Add(rectVertices1);
             Figures.Add(rectVertices2);

@@ -295,12 +295,26 @@ namespace FarseerPhysics.Collision
         /// <param name="aabb">The aabb.</param>
         public void Query(Func<int, bool> callback, ref AABB aabb)
         {
-            _queryStack.Clear();
-            _queryStack.Push(_root);
-
+            lock (_queryStack)
+            {
+                _queryStack.Clear();
+                _queryStack.Push(_root);
+            }
             while (_queryStack.Count > 0)
             {
-                int nodeId = _queryStack.Pop();
+                int nodeId;
+                lock (_queryStack)
+                {
+                    if (_queryStack.Count > 0)
+                    {
+                        nodeId = _queryStack.Pop();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                
                 if (nodeId == NullNode)
                 {
                     continue;
@@ -320,8 +334,11 @@ namespace FarseerPhysics.Collision
                     }
                     else
                     {
-                        _queryStack.Push(node.Child1);
-                        _queryStack.Push(node.Child2);
+                        lock (_queryStack)
+                        {
+                            _queryStack.Push(node.Child1);
+                            _queryStack.Push(node.Child2);
+                        }
                     }
                 }
             }

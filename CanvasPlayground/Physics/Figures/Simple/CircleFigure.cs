@@ -14,12 +14,12 @@ namespace CanvasPlayground.Physics.Figures
     {
         private int _radius;
 
-        public CircleFigure(World world, int radiusPixels, int x, int y, int pieces) : base(world,x,y)
+        public CircleFigure(World world, int radiusPixels, int x, int y, int pieces, string color = null, bool? isStatic = null) : base(world, x, y, color)
         {
             _radius = radiusPixels;
 
             var circleVertices = CreateCircle(radiusPixels, pieces);
-            Create(x, y, circleVertices);
+            Create(x, y, circleVertices, null, isStatic);
 
             Density = 0.3f;
             Friction = 0;

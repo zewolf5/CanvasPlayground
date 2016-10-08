@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,7 @@ namespace CanvasPlayground.Physics.Figures
     {
         public event Func<IFigure, IFigure, FarseerPhysics.Dynamics.Contacts.Contact, bool> OnCollision;
 
-        public void Create(int x, int y, Vertices shape, int radius = 0)
+        public void Create(int x, int y, Vertices shape, int? radius = null, bool? isStatic = null)
         {
             try
             {
@@ -26,11 +27,12 @@ namespace CanvasPlayground.Physics.Figures
                 Body.BodyType = BodyType.Dynamic;
                 Body.AngularVelocity = 0f;
                 Body.Mass = 0.001f;
+                if (isStatic != null) Body.IsStatic = isStatic.Value;
 
                 if (shape.Count <= 1)
                 {
                     //circle
-                    Shape = new CircleShape(ConvertUnits.ToSimUnits(radius), 0.3f);
+                    Shape = new CircleShape(ConvertUnits.ToSimUnits(radius.Value), 0.3f);
                 }
                 else
                 {
@@ -38,15 +40,18 @@ namespace CanvasPlayground.Physics.Figures
                 }
 
                 Fixture = Body.CreateFixture(Shape);
-                //Body.OnCollision += Body_OnCollision;
+                Body.OnCollision += Body_OnCollision;
 
                 OriginalVertices = shape;
 
                 Fixture.Tag = this;
+                Shape.Tag = this;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 if (World != null) throw;
+                Debug.WriteLine($"Shape creation failed ({Id}): {ex.Message}");
+
             }
         }
 
@@ -82,6 +87,10 @@ namespace CanvasPlayground.Physics.Figures
             {
                 return new Vector2() { X = (int)ConvertUnits.ToDisplayUnits(Body.Position.X), Y = (int)ConvertUnits.ToDisplayUnits(Body.Position.Y) };
             }
+            set
+            {
+                Body.Position= new  Vector2() { X = ConvertUnits.ToSimUnits(value.X), Y = ConvertUnits.ToSimUnits(value.Y) };
+            }
         }
 
         public Vector2 LinearVelocity
@@ -90,7 +99,12 @@ namespace CanvasPlayground.Physics.Figures
             {
                 return new Vector2() { X = ConvertUnits.ToDisplayUnits(Body.LinearVelocity.X), Y = ConvertUnits.ToDisplayUnits(Body.LinearVelocity.Y) };
             }
+            set
+            {
+                Body.LinearVelocity = new Vector2() { X = ConvertUnits.ToSimUnits(value.X), Y = ConvertUnits.ToSimUnits(value.Y) };
+            }
         }
+
 
         public int X { get; private set; }
         public int Y { get; private set; }
@@ -147,11 +161,12 @@ namespace CanvasPlayground.Physics.Figures
         }
 
 
-        public BaseFigure(World world, int x, int y)
+        public BaseFigure(World world, int x, int y, string color = null)
         {
             World = world;
             X = x;
             Y = y;
+            HtmlColor = color;
         }
 
 

@@ -36,6 +36,7 @@ namespace CanvasPlayground.Controllers
         public object Get(string method, int clickX, int clickY)
         {
             RenderingHub.Instance.AddBall(clickX, clickY);
+            Debug.WriteLine($"clicked: {clickX},{clickY}");
             return "OK";
         }
 
@@ -45,6 +46,8 @@ namespace CanvasPlayground.Controllers
         // GET api/values/5
         public object Get(string method)
         {
+            var touch = updateTimer.Value;
+
             if (method == "getObjectsStream")
             {
                 Request.Headers.AcceptEncoding.Clear();
@@ -65,7 +68,6 @@ namespace CanvasPlayground.Controllers
 
             if (method == "start")
             {
-                var touch = updateTimer.Value;
                 RenderingHub.Instance.Start();
                 return "OK";
             }
@@ -173,6 +175,7 @@ namespace CanvasPlayground.Controllers
             var scene = new SceneUpdate();
             scene.FrameNo = RenderingHub.Instance.FrameNo;
             scene.Objects = RenderingHub.Instance.GetObjects().ToList();
+            scene.Info = RenderingHub.Instance.GetInfos().ToList();
 
             foreach (var pair in clientSubscribers.ToArray())
             {

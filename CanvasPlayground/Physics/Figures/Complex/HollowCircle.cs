@@ -15,7 +15,7 @@ namespace CanvasPlayground.Physics.Figures
     public class HollowCircle : BaseComplexFigure
     {
 
-        public HollowCircle(World world, int radius, int borderSize, int x, int y) : base(world, x, y)
+        public HollowCircle(World world, int radius, int borderSize, int x, int y, string color = null, bool? isStatic = null) : base(world, x, y, color)
         {
 
             float[] angles;
@@ -32,7 +32,7 @@ namespace CanvasPlayground.Physics.Figures
             {
                 var circleVertex = circleVertices[i];
                 var angle = angles[i];
-                var figure1 = new Rectangle(world, borderSize, length, angle, x + (int)circleVertex.X, y + (int)circleVertex.Y);
+                var figure1 = new Rectangle(world, borderSize, length, angle, x + (int)circleVertex.X, y + (int)circleVertex.Y, color, isStatic);
 
                 figure1.OnCollision += Figure1_OnCollision;
 

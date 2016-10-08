@@ -14,7 +14,7 @@ namespace CanvasPlayground.Physics.Figures
     public class HollowCircleWithInnerSpikes : BaseComplexFigure
     {
 
-        public HollowCircleWithInnerSpikes(World world, int radius, int borderSize, int x, int y) : base(world, x, y)
+        public HollowCircleWithInnerSpikes(World world, int radius, int borderSize, int spikeLength, int spikeWidth, int x, int y, string color = null, bool? isStatic = null) : base(world, x, y, color)
         {
 
             float[] angles;
@@ -31,8 +31,9 @@ namespace CanvasPlayground.Physics.Figures
             {
                 var circleVertex = circleVertices[i];
                 var angle = angles[i];
-                var figure1 = new Rectangle(world, borderSize, length, angle, x + (int)circleVertex.X, y + (int)circleVertex.Y);
-                var figureX = new Rectangle(world, radius/3, 15, angle, x + (int)circleVertex.X, y + (int)circleVertex.Y);
+                var figure1 = new Rectangle(world, borderSize, length, angle, x + (int)circleVertex.X, y + (int)circleVertex.Y, color, isStatic);
+                float posAdjust = 1f - (float)spikeLength / 2f / (float)radius;
+                var figureX = new Rectangle(world, spikeLength, spikeWidth, angle-0.3f, x + (int)(circleVertex.X * posAdjust), y + (int)(circleVertex.Y * posAdjust), color, isStatic);
 
                 Figures.Add(figure1);
                 Figures.Add(figureX);

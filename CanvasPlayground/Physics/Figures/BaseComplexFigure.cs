@@ -28,9 +28,9 @@ namespace CanvasPlayground.Physics.Figures
         {
             if (RotationPerSecond != 0)
             {
-                var stepAngle = RotationPerSecond*seconds;
+                var stepAngle = RotationPerSecond * seconds;
                 _currentAngle += stepAngle;
-                
+
                 foreach (var figure in Figures)
                 {
                     var posO = figure.Body.Position;
@@ -43,7 +43,7 @@ namespace CanvasPlayground.Physics.Figures
                     var pos2 = RotateVector2(vec, stepAngle);
                     var vec2 = new Vector2(pos2.X + X, pos2.Y + Y);
                     figure.Body.Position = ConvertUnits.ToSimUnits(vec2);
-                    
+
                     //figure.Body.SetTransform(Vector2.Zero, _currentAngle);
                 }
 
@@ -59,7 +59,7 @@ namespace CanvasPlayground.Physics.Figures
             }
         }
 
-        public BaseComplexFigure(World world, int x, int y)
+        public BaseComplexFigure(World world, int x, int y, string color = null)
         {
             World = world;
             X = x;

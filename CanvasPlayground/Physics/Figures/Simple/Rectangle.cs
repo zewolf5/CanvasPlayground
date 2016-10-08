@@ -15,7 +15,7 @@ namespace CanvasPlayground.Physics.Figures
         private int _originalWidth;
         private int _originalHeight;
 
-        public Rectangle(World world, int width, int height, float angle, int x, int y) : base(world,x,y)
+        public Rectangle(World world, int width, int height, float angle, int x, int y, string color = null, bool? isStatic=null) : base(world, x, y, color)
         {
             _originalWidth = width;
             _originalHeight = height;
@@ -23,7 +23,7 @@ namespace CanvasPlayground.Physics.Figures
             var rectVertices = CreateRectangle(width, height);
             rectVertices = RotateVertices(rectVertices, angle);
 
-            Create(x, y, rectVertices);
+            Create(x, y, rectVertices, null, isStatic);
 
             Density = 0.3f;
             Friction = 0;
@@ -32,8 +32,8 @@ namespace CanvasPlayground.Physics.Figures
 
         public static Vertices CreateRectangle(float hx, float hy)
         {
-            var simHx = ConvertUnits.ToSimUnits(hx/2);
-            var simHy = ConvertUnits.ToSimUnits(hy/2);
+            var simHx = ConvertUnits.ToSimUnits(hx / 2);
+            var simHy = ConvertUnits.ToSimUnits(hy / 2);
             Vertices vertices = new Vertices(4);
             vertices.Add(new Vector2(-simHx, -simHy));
             vertices.Add(new Vector2(simHx, -simHy));

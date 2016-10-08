@@ -413,18 +413,21 @@ namespace FarseerPhysics.Dynamics.Contacts
             //Debug.Assert(ShapeType.Unknown < type1 && type1 < ShapeType.TypeCount);
             //Debug.Assert(ShapeType.Unknown < type2 && type2 < ShapeType.TypeCount);
 
-            Contact c;
+            Contact c = null;
             Queue<Contact> pool = fixtureA.Body._world._contactPool;
             if (pool.Count > 0)
             {
-                c = pool.Dequeue();
-                if ((type1 >= type2 || (type1 == ShapeType.Edge && type2 == ShapeType.Polygon)) && !(type2 == ShapeType.Edge && type1 == ShapeType.Polygon))
+                lock(fixtureA.Body._world._contactPool) c = pool.Dequeue() ?? c;
+                if (c != null)
                 {
-                    c.Reset(fixtureA, indexA, fixtureB, indexB);
-                }
-                else
-                {
-                    c.Reset(fixtureB, indexB, fixtureA, indexA);
+                    if ((type1 >= type2 || (type1 == ShapeType.Edge && type2 == ShapeType.Polygon)) && !(type2 == ShapeType.Edge && type1 == ShapeType.Polygon))
+                    {
+                        c.Reset(fixtureA, indexA, fixtureB, indexB);
+                    }
+                    else
+                    {
+                        c.Reset(fixtureB, indexB, fixtureA, indexA);
+                    }
                 }
             }
             else
@@ -450,7 +453,10 @@ namespace FarseerPhysics.Dynamics.Contacts
 #if USE_ACTIVE_CONTACT_SET
             FixtureA.Body.World.ContactManager.RemoveActiveContact(this);
 #endif
-            FixtureA.Body._world._contactPool.Enqueue(this);
+            lock (FixtureA.Body._world._contactPool)
+            {
+                FixtureA.Body._world._contactPool.Enqueue(this);
+            }
 
             if (Manifold.PointCount > 0 && FixtureA.IsSensor == false && FixtureB.IsSensor == false)
             {

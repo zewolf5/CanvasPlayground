@@ -6,5 +6,7 @@ namespace CanvasPlayground.Models
     {
         public long FrameNo { get; set; }
         public List<ObjectInfo> Objects { get; set; }
+        public List<Info> Info { get; set; }
+
     }
 }

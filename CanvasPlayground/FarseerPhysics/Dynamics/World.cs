@@ -324,7 +324,7 @@ namespace FarseerPhysics.Dynamics
                     }
 #endif
                     // Add to world list.
-                    BodyList.Add(body);
+                    lock(BodyList) BodyList.Add(body);
 
                     if (BodyAdded != null)
                         BodyAdded(body);
@@ -386,7 +386,7 @@ namespace FarseerPhysics.Dynamics
                     body.FixtureList = null;
 
                     // Remove world body list.
-                    BodyList.Remove(body);
+                   lock(BodyList) BodyList.Remove(body);
 
                     if (BodyRemoved != null)
                         BodyRemoved(body);
@@ -436,7 +436,9 @@ namespace FarseerPhysics.Dynamics
 #if USE_ISLAND_SET
             //Debug.Assert(IslandSet.Count == 0);
 #else
-            foreach (Body b in BodyList)
+            List<Body> bodyList;
+            lock (BodyList) bodyList = BodyList.ToList();
+            foreach (Body b in bodyList)
             {
                 b._island = false;
             }
@@ -477,7 +479,8 @@ namespace FarseerPhysics.Dynamics
 #else
             for (int index = BodyList.Count - 1; index >= 0; index--)
             {
-                Body seed = BodyList[index];
+                Body seed;
+                lock (BodyList) seed = BodyList[index];
 #endif
                 if (seed._island)
                 {
@@ -632,7 +635,8 @@ namespace FarseerPhysics.Dynamics
 #if USE_ISLAND_SET
             foreach (var b in IslandSet)
 #else
-            foreach (Body b in BodyList)
+            lock (BodyList) bodyList = BodyList.ToList();
+            foreach (Body b in bodyList)
 #endif
             {
                 // If a body was not in an island then it did not move.
@@ -1483,7 +1487,9 @@ namespace FarseerPhysics.Dynamics
         /// Warning: Calling this method mid-update might cause a crash.
         public void ShiftOrigin(Vector2 newOrigin)
         {
-            foreach (Body b in BodyList)
+            List<Body> bodyList;
+            lock (BodyList) bodyList = BodyList.ToList();
+            foreach (Body b in bodyList)
             {
                 b._xf.p -= newOrigin;
                 b._sweep.C0 -= newOrigin;

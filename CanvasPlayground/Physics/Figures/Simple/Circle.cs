@@ -14,9 +14,9 @@ namespace CanvasPlayground.Physics.Figures
     {
         private int _radius;
 
-        public Circle(World world, int radiusPixels, int x, int y) : base(world,x,y)
+        public Circle(World world, int radiusPixels, int x, int y, string color = null, bool? isStatic = null) : base(world,x,y,color)
         {
-            Create(x, y, new Vertices(), radiusPixels);
+            Create(x, y, new Vertices(), radiusPixels, isStatic);
 
             Density = 0.3f;
             Friction = 0;
