@@ -28,6 +28,7 @@ namespace CanvasPlayground.Physics
         //2 lists of all the objects
 
         public long FrameNo => _theWorldLoop.FrameNo;
+        public DateTime FrameRenderTime => _theWorldLoop.FrameRenderTime;
 
         private IScene _currentScene;
 
@@ -52,8 +53,8 @@ namespace CanvasPlayground.Physics
         public RenderingHub()
         {
 
-            _theWorldLoop = new WorldLoop();
-            _theWorldLoop.Start(new Vector2(0, 10), 20);
+            _theWorldLoop = new WorldLoop(5);
+            _theWorldLoop.Start(new Vector2(0, 10));
         }
 
         public void SceneStart(string name)

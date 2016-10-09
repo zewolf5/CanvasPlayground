@@ -22,6 +22,7 @@ namespace CanvasPlayground.Physics
 
         //Frame counter
         public long FrameNo { get; internal set; }
+        public DateTime FrameRenderTime { get; internal set; }
 
 
         //Misc
@@ -43,11 +44,15 @@ namespace CanvasPlayground.Physics
 
         public World World { get; private set; }
 
+        private int _sleepDuration = 30;
+
+
         private System.Windows.Threading.Dispatcher _worldDispatcher;
 
-        public WorldLoop()
+        public WorldLoop(int sleepDuration)
         {
             ManualResetEvent dispatcherReadyEvent = new ManualResetEvent(false);
+            _sleepDuration = sleepDuration;
 
             new Thread(new ThreadStart(() =>
             {
@@ -59,7 +64,7 @@ namespace CanvasPlayground.Physics
             dispatcherReadyEvent.WaitOne();
         }
 
-        public void Start(Vector2 gravity, int sleepDuration)
+        public void Start(Vector2 gravity)
         {
             _gravity = gravity;
             Figures = new List<IFigure>();
@@ -144,6 +149,7 @@ namespace CanvasPlayground.Physics
             var swa = Stopwatch.StartNew();
             DoTheStepTimeout((float)stepSize.TotalSeconds);
             FrameNo++;
+            FrameRenderTime = now;
             if (swa.ElapsedMilliseconds > 70)
             {
                 Debug.WriteLine($"stepTime: {(int)stepSize.TotalMilliseconds} - STEP: {(int)swa.ElapsedMilliseconds}");
@@ -167,11 +173,14 @@ namespace CanvasPlayground.Physics
             {
                 if (figure.IsOutOfBounds)
                 {
-                    RemoveComplexFigure(figure); 
+                    RemoveComplexFigure(figure);
                     Debug.WriteLine($"REMOVED OUT OF PLACE BALL");
                 }
             }
-            Thread.Sleep(30);
+            var sleep = _sleepDuration;
+            var elapsed = (int)DateTime.Now.Subtract(now).TotalMilliseconds;
+            if(sleep>elapsed) Thread.Sleep(sleep-elapsed);
+            Thread.Sleep(1);
         }
 
 
@@ -202,7 +211,7 @@ namespace CanvasPlayground.Physics
 
             });
 
-    
+
 
             //while (!_stepWorkDone)
             //{
@@ -232,7 +241,7 @@ namespace CanvasPlayground.Physics
             //}
 
         }
-    
+
         private void AddFigure(IFigure figure)
         {
             lock (Figures) Figures.Add(figure);

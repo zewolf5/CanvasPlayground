@@ -11,6 +11,7 @@
     <script src="/Scripts/XMLHttpRequest.js"></script>
 
 
+    <a href="/api/values?method=RECYCLE" target="_blank">RESTART</a>
     <a href="#" onclick="runAjaxMethod('stop');">Stop</a>
     <a href="#" onclick="runAjaxMethod('start');">Start</a>
     <a href="/api/values?method=getObjects" target="_blank">Get Objects</a>
@@ -33,9 +34,11 @@
     <div style="display:inline-block">Server polling time: <input type="text" id="adjust" style="display:inline-block" /></div>
     <div id="text" style="display: inline-block">-1</div>
     <div id="fps" style="display: inline-block">-1</div>
+    <div id="fps2" style="display: inline-block">-1</div>
     <div id="text2" style="display: inline-block">x</div>
     <br />
     <div id="text3" style="display:inline-block">y</div>
+    <div id="text4" style="display:inline-block">ø</div>
 
 
     <canvas id="board" width="1200" height="1000">
@@ -46,57 +49,148 @@
     <script id="chess board" type="text/javascript">
 
 
-        startStream();
+        var sceneObject;
+        var lastSceneObject;
+        var frameNo = 0;
+        var lastFrameNo = 0;
+
+        var fpsStart = +new Date();
+        var fpsCount = 0;
+        var fpsStart2 = +new Date();
+        var fpsCount2 = 0;
+
+        var lastTime = +new Date();
+        var timeOfCall = +new Date();
+
+        var xhr = new XMLHttpRequest();
+        var startStreamTime = +new Date;
+
+        var lastLen = 0;
+
+        var renderDelay = 100;
+
+        startStream(); //Stream
+
+        //setInterval(getDrawingData, 25); //Poll
 
         function startStream() {
-            var xhr = new XMLHttpRequest();
+            console.log("new stream connection");
             xhr.open('GET', '/api/values?method=getObjectsStream', true);
             xhr.send(null);
             var timer;
-            var startStreamTime = +new Date;
-            
             timer = window.setInterval(function () {
+                var txt = xhr.responseText;
                 if (xhr.readyState == XMLHttpRequest.DONE) {
                     window.clearTimeout(timer);
-                    $('body').append('done <br />');
                 }
-                //$('body').append('state: ' + xhr.readyState + '<br />');
-                //$('body').append('data: ' + xhr.responseText + '<br />');
-                parseStream(xhr.responseText);
+
+                //var fpsNow = +new Date();
+                //if (fpsNow - fpsStart > 1000) {
+                //    $("#fps").html("FPS: " + fpsCount);
+                //    fpsStart = fpsNow;
+                //    fpsCount = 0;
+                //}
+                //fpsCount++;
+
+                parseStream(txt);
                 var nowTime = +new Date;
                 if (nowTime - startStreamTime > 30000) {
+                    console.log("timing out stream. starting new");
+                    startStreamTime = nowTime;
                     //Start new stream;
                     xhr.abort();
                     startStream();
-                    timer.stop();
+                    lastStreamOffset = 0;
+                    clearInterval(timer);
                 }
-            }, 10);
 
+            }, renderDelay);
         }
+
+
+
+        function getDrawingData() {
+            $.ajax({
+                type: "GET",
+                url: "/api/values?method=getObjects",
+                data: "",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    if (frameNo < response.FrameNo) {
+                        sceneObject = response;
+                        frameNo = sceneObject.FrameNo;
+                        $("#text").html("Objects: " + sceneObject.Objects.length);
+                        var fpsNow = +new Date();
+                        if (fpsNow - fpsStart > 1000) {
+                            $("#fps").html("FPS: " + fpsCount);
+                            fpsStart = fpsNow;
+                            fpsCount = 0;
+                        }
+                        fpsCount++;
+                    }
+                }
+            });
+        }
+
+        var lastStreamOffset = 0;
+        var animationQueue = [];
+        var msStart = Date.now();
+        var msStart2 = -1;
+        var delta = -1;
 
         function parseStream(text) {
-            var items = text.split('\n\n');
-            var lastItem = items[items.length - 2];
-            //$("#text2").html(lastItem);
-            //$('body').append(json);
-            var response = JSON.stringify(eval("(" + lastItem + ")"));
-            var json = JSON.parse(response);
-            parseJsonData(json);
-            //$("#text3").html(json);
+            if (lastLen != text.length) {
+                lastLen = text.length;
+                text = text.substring(lastStreamOffset);
+
+                var items = text.split('\n\n');
+                for (var i = 0; i < items.length - 1; i++) {
+
+                    try {
+                        var js = JSON.parse(items[i]);
+
+                        if (i === 0 && delta === -1) {
+                            msStart2 = js.Ms;
+                            delta = msStart - msStart2;
+                        }
+
+                        animationQueue.push(js);
+                        while (animationQueue.length > 500) {
+                            animationQueue.shift();
+                            console.log("queue overflow");
+                        }
+                        lastStreamOffset += items[i].length + 2;
+                    } catch (e) {
+                        //Swallow it
+                    }
+                }
+
+            } else {
+                console.log("TEXT LEN: " + text.length);
+            }
 
         }
+
+        //queue.push(2);         // queue is now [2]
+        //queue.push(5);         // queue is now [2, 5]
+        //var i = queue.shift(); // queue is now [5]
+        //alert(i);
+
         function parseJsonData(response) {
             if (frameNo < response.FrameNo) {
                 sceneObject = response;
                 frameNo = sceneObject.FrameNo;
                 $("#text").html("Objects: " + sceneObject.Objects.length);
-                var fpsNow = +new Date();
-                if (fpsNow - fpsStart > 1000) {
-                    $("#fps").html("FPS: " + fpsCount);
-                    fpsStart = fpsNow;
-                    fpsCount = 0;
+
+
+                var fpsNow2 = +new Date();
+                if (fpsNow2 - fpsStart2 > 1000) {
+                    $("#fps2").html("FPS2: " + fpsCount2);
+                    fpsStart2 = fpsNow2;
+                    fpsCount2 = 0;
                 }
-                fpsCount++;
+                fpsCount2++;
             }
         }
 
@@ -152,91 +246,123 @@
         }
 
 
-        var sceneObject;
-        var lastSceneObject;
-        var frameNo = 0;
-        var lastFrameNo = 0;
 
-        var fpsStart = +new Date();
-        var fpsCount = 0;
-
-        var lastTime = +new Date();
-        var timeOfCall = +new Date();
-
-        function getDrawingData() {
-            //$.ajax({
-            //    type: "GET",
-            //    url: "/api/values?method=getObjects",
-            //    data: "",
-            //    contentType: "application/json; charset=utf-8",
-            //    dataType: "json",
-            //    success: function (response) {
-            //        if (frameNo < response.FrameNo) {
-            //            sceneObject = response;
-            //            frameNo = sceneObject.FrameNo;
-            //            $("#text").html("Objects: " + sceneObject.Objects.length);
-            //            var fpsNow = +new Date();
-            //            if (fpsNow - fpsStart > 1000) {
-            //                $("#fps").html("FPS: " + fpsCount);
-            //                fpsStart = fpsNow;
-            //                fpsCount = 0;
-            //            }
-            //            fpsCount++;
-            //        }
-            //    }
-            //});
-        }
+        var lastnow = Date.now();
+        var lastani = 0;
+        var adjustLag = 20;
+        var adjustLast = Date.now();
 
         var redraw = function () {
-
-            if (lastFrameNo == frameNo) {
-                var now = +new Date();
-                var timeGone = now - lastTime;
-                lastTime = now;
-                if (lastSceneObject !== undefined) {
-                    var itemsObject = lastSceneObject.Objects;
-
-                    if (itemsObject !== undefined) {
-
-
-                        if ($("#checky").is(':checked')) {
-                            if (canvas !== undefined) {
-                                context.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
-                            }
-
-                            //Interpolate
-                            for (var i = 0; i < itemsObject.length; i++) {
-
-                                var dx = itemsObject[i].D.X;
-                                var dy = itemsObject[i].D.Y;
-                                dx = dx * timeGone / 1000;
-                                dy = dy * timeGone / 1000;
-                                itemsObject[i].P.X = itemsObject[i].P.X + dx;
-                                itemsObject[i].P.Y = itemsObject[i].P.Y + dy;
-                            }
-
-                            renderBallsNStuff(itemsObject); //Draw all the objects
-                        }
+            var now = Date.now();
+            //console.log("Redraw time: " + (now - lastnow) + " - adjustLag=" + adjustLag);
+            //console.log("time passed: " + timePassed);
+            //console.log("redraw");
+            if (animationQueue.length > 0) {
+                var peek = animationQueue[0];
+                var timePassed = now - peek.Ms - delta - renderDelay - adjustLag;
+                if (timePassed >= 0) {
+                    var json = animationQueue.shift();
+                    //console.log(now + " - " + json.Ms + " - " + json.FrameNo);
+                    while (timePassed > 100 && animationQueue.length > 0) {
+                        peek = animationQueue[0];
+                        json = animationQueue.shift();
+                        //console.log(now + " - " + json.Ms + " - " + json.FrameNo + " (SKIPFRAME)");
+                        //console.log("dropping " + peek.FrameNo);
+                        timePassed = now - peek.Ms - delta - renderDelay - adjustLag;
                     }
+                    //console.log("timePassed: " + peek.Ms + " - " + timePassed);
+                    //console.log("Redraw remote time: " + (json.Ms - lastani));
+                    //console.log("Redraw time: " +
+                    //    (now - lastnow) +
+                    //    " - Ani: " +
+                    //    +(json.Ms - lastani) +
+                    //    " - " +
+                    //    json.FrameNo);
+                    parseJsonData(json);
+                    lastani = json.Ms;
+                } else {
+                    //parseJsonData(peek);
+               
                 }
-
+                //while (timePassed > 125 && animationQueue.length>0) {
+                //    peek = animationQueue[0];
+                //    animationQueue.shift();
+                //    timePassed = now - peek.Ms - delta;
+                //    //console.log("timePassed: " + peek.Ms + " - " + timePassed);
+                //}
+                //if (timePassed < 0) {
+                //var json = animationQueue.shift();
+                //console.log("frame: " + json.FrameNo);
+                //if(timePassed>400) console.log("passed: " + timePassed);
+                //parseJsonData(peek);
+                //} else {
+                //console.log("frame: " + peek.FrameNo);
+                //}
             } else {
-                if (sceneObject !== undefined) {
-                    lastFrameNo = frameNo;
-                    lastSceneObject = sceneObject;
-                    var itemsObject = sceneObject.Objects;
-                    lastTime = +new Date();
-
-                    if (canvas !== undefined) {
-                        context.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
-                    }
-
-                    renderBallsNStuff(itemsObject);  //Draw all the objects
-                    renderTextInfo(lastSceneObject.Info);
-
+                console.log("no queue ");
+                if (Date.now() - adjustLast > 1000) {
+                    adjustLast = Date.now();
+                    adjustLag += 100;
+                    if (adjustLag > renderDelay * 2) adjustLag = renderDelay * 2;
                 }
             }
+            lastnow = now;
+
+            //if (lastFrameNo == frameNo) {
+            //    //console.log("frame repeat: " + frameNo);
+            //    var now = +new Date();
+            //    var timeGone = now - lastTime;
+            //    lastTime = now;
+            //    if (lastSceneObject !== undefined) {
+            //        var itemsObject = lastSceneObject.Objects;
+
+            //        if (itemsObject !== undefined) {
+
+
+            //            if ($("#checky").is(':checked')) {
+            //                if (canvas !== undefined) {
+            //                    context.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
+            //                }
+
+            //                //Interpolate
+            //                for (var i = 0; i < itemsObject.length; i++) {
+
+            //                    var dx = itemsObject[i].D.X;
+            //                    var dy = itemsObject[i].D.Y;
+            //                    dx = dx * timeGone / 1000;
+            //                    dy = dy * timeGone / 1000;
+            //                    itemsObject[i].P.X = itemsObject[i].P.X + dx;
+            //                    itemsObject[i].P.Y = itemsObject[i].P.Y + dy;
+            //                }
+
+            //                renderBallsNStuff(itemsObject); //Draw all the objects
+            //            }
+            //        }
+            //    }
+
+            //} else {
+
+            if (sceneObject !== undefined) {
+                lastFrameNo = frameNo;
+                lastSceneObject = sceneObject;
+                var itemsObject = sceneObject.Objects;
+                lastTime = +new Date();
+
+                if (canvas !== undefined) {
+                    context.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
+                }
+
+                renderBallsNStuff(itemsObject);  //Draw all the objects
+                renderTextInfo(lastSceneObject.Info);
+
+            }
+
+            //}
             requestAnimationFrame(redraw);
+            //var timeUsed = Date.now() - now;
+            //if (timeUsed > 20) {
+            //    console.log("jerky " + timeUsed);
+            //}
         }
 
         function renderBallsNStuff(itemsObject) {
@@ -307,12 +433,6 @@
             $("#board").attr("height", (winH) + "px");
 
 
-            //Set timer based on input
-            //var timer = function () {
-            //    getDrawingData();
-            //    setTimeout(timer, $("#adjust").val());
-            //};
-            //setTimeout(timer, $("#adjust").val());
 
             //Start drawing loop
             redraw();
