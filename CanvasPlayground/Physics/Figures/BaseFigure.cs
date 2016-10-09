@@ -197,7 +197,7 @@ namespace CanvasPlayground.Physics.Figures
             return list;
         }
 
-        internal Vertices RotateVertices(Vertices verts, float angle)
+        public static Vertices RotateVertices(Vertices verts, float angle)
         {
             var list = new Vertices();
 

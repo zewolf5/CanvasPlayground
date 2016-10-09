@@ -30,15 +30,9 @@
     <a href="#" onclick="runAjaxMethod('eventSomeEvent');">Event to Test Scene</a>
 
 
-    <div style=""><input type="checkbox" id="checky" style="height: 30px; width: 30px;display:inline-block" value="0" /></div>
-    <div style="display:inline-block">Server polling time: <input type="text" id="adjust" style="display:inline-block" /></div>
+    <div style="">Check to Poll<input type="checkbox" id="checky" style="height: 30px; width: 30px;display:inline-block" value="0" /></div>
     <div id="text" style="display: inline-block">-1</div>
-    <div id="fps" style="display: inline-block">-1</div>
     <div id="fps2" style="display: inline-block">-1</div>
-    <div id="text2" style="display: inline-block">x</div>
-    <br />
-    <div id="text3" style="display:inline-block">y</div>
-    <div id="text4" style="display:inline-block">ø</div>
 
 
     <canvas id="board" width="1200" height="1000">
@@ -67,32 +61,47 @@
 
         var lastLen = 0;
 
-        var renderDelay = 100;
+        var renderDelay = 250;
 
-        startStream(); //Stream
+        var poll = false;
 
-        //setInterval(getDrawingData, 25); //Poll
+        var pollObject;
+
+        if (poll) {
+            pollObject = setInterval(getDrawingData, renderDelay); //Poll
+        } else {
+            startStream(); //Stream  
+        }
+
+        $("#checky")
+       .click(function () {
+           clearInterval(pollObject);
+           if ($("#checky").is(':checked')) {
+               console.log("Switching to Poll");
+               poll = true;
+               pollObject = setInterval(getDrawingData, renderDelay); //Poll
+           } else {
+               console.log("Switching to Stream");
+               poll = false;
+               xhr.abort();
+               lastStreamOffset = 0;
+               startStream(); //Stream  
+           }
+       });
+
 
         function startStream() {
             console.log("new stream connection");
             xhr.open('GET', '/api/values?method=getObjectsStream', true);
             xhr.send(null);
-            var timer;
-            timer = window.setInterval(function () {
+            pollObject = window.setInterval(function () {
                 var txt = xhr.responseText;
                 if (xhr.readyState == XMLHttpRequest.DONE) {
-                    window.clearTimeout(timer);
+                    window.clearTimeout(pollObject);
                 }
 
-                //var fpsNow = +new Date();
-                //if (fpsNow - fpsStart > 1000) {
-                //    $("#fps").html("FPS: " + fpsCount);
-                //    fpsStart = fpsNow;
-                //    fpsCount = 0;
-                //}
-                //fpsCount++;
+                parseStream(txt, false);
 
-                parseStream(txt);
                 var nowTime = +new Date;
                 if (nowTime - startStreamTime > 30000) {
                     console.log("timing out stream. starting new");
@@ -101,12 +110,13 @@
                     xhr.abort();
                     startStream();
                     lastStreamOffset = 0;
-                    clearInterval(timer);
+                    clearInterval(pollObject);
                 }
 
             }, renderDelay);
         }
 
+   
 
 
         function getDrawingData() {
@@ -115,21 +125,13 @@
                 url: "/api/values?method=getObjects",
                 data: "",
                 contentType: "application/json; charset=utf-8",
-                dataType: "json",
+                dataType: "text",
                 success: function (response) {
-                    if (frameNo < response.FrameNo) {
-                        sceneObject = response;
-                        frameNo = sceneObject.FrameNo;
-                        $("#text").html("Objects: " + sceneObject.Objects.length);
-                        var fpsNow = +new Date();
-                        if (fpsNow - fpsStart > 1000) {
-                            $("#fps").html("FPS: " + fpsCount);
-                            fpsStart = fpsNow;
-                            fpsCount = 0;
-                        }
-                        fpsCount++;
-                    }
-                }
+                    parseStream(response, true);
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) { 
+                    alert("Status: " + textStatus + " - Error: " + errorThrown);
+                }       
             });
         }
 
@@ -138,29 +140,40 @@
         var msStart = Date.now();
         var msStart2 = -1;
         var delta = -1;
+        var lastQueuedFrame = 0;
 
-        function parseStream(text) {
-            if (lastLen != text.length) {
+        function parseStream(text, polling) {
+            if (polling===true || lastLen != text.length) {
                 lastLen = text.length;
-                text = text.substring(lastStreamOffset);
+                if(polling===false) text = text.substring(lastStreamOffset);
 
                 var items = text.split('\n\n');
+                //console.log("items: " + items.length + " - " + text);
                 for (var i = 0; i < items.length - 1; i++) {
 
                     try {
                         var js = JSON.parse(items[i]);
+                        if (lastQueuedFrame < js.FrameNo) {
 
-                        if (i === 0 && delta === -1) {
-                            msStart2 = js.Ms;
-                            delta = msStart - msStart2;
-                        }
+                            lastQueuedFrame = js.FrameNo;
 
-                        animationQueue.push(js);
-                        while (animationQueue.length > 500) {
-                            animationQueue.shift();
-                            console.log("queue overflow");
+                            if (i === 0 && delta === -1) {
+                                msStart2 = js.Ms;
+                                delta = msStart - msStart2;
+                            }
+
+                            animationQueue.push(js);
+                            //console.log("Queued: " + js.FrameNo);
+
+                            while (animationQueue.length > 500) {
+                                animationQueue.shift();
+                                console.log("queue overflow");
+                            }
+
+                            if (polling === false) lastStreamOffset += items[i].length + 2;
+                        } else {
+                            //console.log("Dropped: " + js.FrameNo);
                         }
-                        lastStreamOffset += items[i].length + 2;
                     } catch (e) {
                         //Swallow it
                     }
@@ -171,11 +184,6 @@
             }
 
         }
-
-        //queue.push(2);         // queue is now [2]
-        //queue.push(5);         // queue is now [2, 5]
-        //var i = queue.shift(); // queue is now [5]
-        //alert(i);
 
         function parseJsonData(response) {
             if (frameNo < response.FrameNo) {
@@ -251,39 +259,55 @@
         var lastani = 0;
         var adjustLag = 20;
         var adjustLast = Date.now();
-
         var redraw = function () {
             var now = Date.now();
             //console.log("Redraw time: " + (now - lastnow) + " - adjustLag=" + adjustLag);
             //console.log("time passed: " + timePassed);
             //console.log("redraw");
             if (animationQueue.length > 0) {
-                var peek = animationQueue[0];
-                var timePassed = now - peek.Ms - delta - renderDelay - adjustLag;
-                if (timePassed >= 0) {
-                    var json = animationQueue.shift();
-                    //console.log(now + " - " + json.Ms + " - " + json.FrameNo);
-                    while (timePassed > 100 && animationQueue.length > 0) {
-                        peek = animationQueue[0];
-                        json = animationQueue.shift();
-                        //console.log(now + " - " + json.Ms + " - " + json.FrameNo + " (SKIPFRAME)");
-                        //console.log("dropping " + peek.FrameNo);
-                        timePassed = now - peek.Ms - delta - renderDelay - adjustLag;
+                //if (poll === false) {
+                    var peek = animationQueue[0];
+                    var timePassed = now - peek.Ms - delta - renderDelay - adjustLag;
+                    if (timePassed >= 0) {
+                        var json = animationQueue.shift();
+                        //console.log(now + " - " + json.Ms + " - " + json.FrameNo);
+                        while (timePassed > 100 && animationQueue.length > 0) {
+                            peek = animationQueue[0];
+                            json = animationQueue.shift();
+                            //console.log(now + " - " + json.Ms + " - " + json.FrameNo + " (SKIPFRAME)");
+                            //console.log("dropping " + peek.FrameNo);
+                            timePassed = now - peek.Ms - delta - renderDelay - adjustLag;
+                        }
+                        //console.log("timePassed: " + peek.Ms + " - " + timePassed);
+                        //console.log("Redraw remote time: " + (json.Ms - lastani));
+                        //console.log("Redraw time: " +
+                        //    (now - lastnow) +
+                        //    " - Ani: " +
+                        //    +(json.Ms - lastani) +
+                        //    " - " +
+                        //    json.FrameNo);
+                        parseJsonData(json);
+                        lastani = json.Ms;
                     }
-                    //console.log("timePassed: " + peek.Ms + " - " + timePassed);
-                    //console.log("Redraw remote time: " + (json.Ms - lastani));
-                    //console.log("Redraw time: " +
-                    //    (now - lastnow) +
-                    //    " - Ani: " +
-                    //    +(json.Ms - lastani) +
-                    //    " - " +
-                    //    json.FrameNo);
-                    parseJsonData(json);
-                    lastani = json.Ms;
-                } else {
-                    //parseJsonData(peek);
-               
-                }
+                //}
+                //else {
+                //    var peek = animationQueue[0];
+                //    //var timePassed = now - peek.Ms - delta - renderDelay - adjustLag;
+                //    //if (timePassed >= 0) {
+                //        var json = animationQueue.shift();
+                //        //console.log(now + " - " + json.Ms + " - " + json.FrameNo);
+                //        //while (timePassed > 100 && animationQueue.length > 0) {
+                //        //    peek = animationQueue[0];
+                //        //    json = animationQueue.shift();
+                //        //    //console.log(now + " - " + json.Ms + " - " + json.FrameNo + " (SKIPFRAME)");
+                //        //    console.log("dropping " + peek.FrameNo);
+                //        //    timePassed = now - peek.Ms - delta - renderDelay - adjustLag;
+                //        //}
+                //    //console.log("Parse: " + json.FrameNo);
+                //        parseJsonData(json);
+                //        //lastani = json.Ms;
+                //    //}
+                //}
                 //while (timePassed > 125 && animationQueue.length>0) {
                 //    peek = animationQueue[0];
                 //    animationQueue.shift();
@@ -299,7 +323,7 @@
                 //console.log("frame: " + peek.FrameNo);
                 //}
             } else {
-                console.log("no queue ");
+                //console.log("no queue ");
                 if (Date.now() - adjustLast > 1000) {
                     adjustLast = Date.now();
                     adjustLag += 100;
@@ -372,16 +396,18 @@
                         drawShape(itemsObject[i].P, itemsObject[i].V, itemsObject[i].C);
                     } else {
                         drawCircle(itemsObject[i].P.X, itemsObject[i].P.Y, itemsObject[i].C);
+
+                        if ((itemsObject[i].I + "").length == 4) {
+                            drawText(itemsObject[i].P.X - 20, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                        } else if ((itemsObject[i].I + "").length == 3) {
+                            drawText(itemsObject[i].P.X - 15, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                        } else if ((itemsObject[i].I + "").length == 2) {
+                            drawText(itemsObject[i].P.X - 10, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                        } else {
+                            drawText(itemsObject[i].P.X - 5, itemsObject[i].P.Y + 5, itemsObject[i].I);
+                        }
                     }
-                    //if ((itemsObject[i].I + "").length == 4) {
-                    //    drawText(itemsObject[i].P.X - 20, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                    //} else if ((itemsObject[i].I + "").length == 3) {
-                    //    drawText(itemsObject[i].P.X - 15, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                    //} else if ((itemsObject[i].I + "").length == 2) {
-                    //    drawText(itemsObject[i].P.X - 10, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                    //} else {
-                    //    drawText(itemsObject[i].P.X - 5, itemsObject[i].P.Y + 5, itemsObject[i].I);
-                    //}
+                
                 }
             }
         }
@@ -389,9 +415,11 @@
         function renderTextInfo(textInfos) {
             for (var i = 0; i < textInfos.length; i++) {
                 var textInfo = textInfos[i];
-                context.font = textInfo.S + "px " + textInfo.F;
-                context.fillStyle = "black";
-                context.fillText(textInfo.T, textInfo.P.X, textInfo.P.Y);
+                if (textInfo != null) {
+                    context.font = textInfo.S + "px " + textInfo.F;
+                    context.fillStyle = "black";
+                    context.fillText(textInfo.T, textInfo.P.X, textInfo.P.Y);
+                }2
                 //alert(textInfo.T);
             }
         }

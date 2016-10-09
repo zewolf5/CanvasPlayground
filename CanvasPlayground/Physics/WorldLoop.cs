@@ -47,7 +47,7 @@ namespace CanvasPlayground.Physics
         private int _sleepDuration = 30;
 
 
-        private System.Windows.Threading.Dispatcher _worldDispatcher;
+        public Dispatcher WorldDispatcher { get; set; }
 
         public WorldLoop(int sleepDuration)
         {
@@ -56,12 +56,21 @@ namespace CanvasPlayground.Physics
 
             new Thread(new ThreadStart(() =>
             {
-                _worldDispatcher = Dispatcher.CurrentDispatcher;
+                WorldDispatcher = Dispatcher.CurrentDispatcher;
                 dispatcherReadyEvent.Set();
                 Dispatcher.Run();
             })).Start();
 
             dispatcherReadyEvent.WaitOne();
+        }
+
+        public void Invoke(Action action)
+        {
+            WorldDispatcher.Invoke(action);
+        }
+        public void BeginInvoke(Action action)
+        {
+            WorldDispatcher.BeginInvoke(action);
         }
 
         public void Start(Vector2 gravity)
@@ -189,7 +198,7 @@ namespace CanvasPlayground.Physics
 
             var sw = Stopwatch.StartNew();
 
-            _worldDispatcher.Invoke(() =>
+            WorldDispatcher.Invoke(() =>
             {
                 World.Step(time);
 
@@ -250,7 +259,7 @@ namespace CanvasPlayground.Physics
 
         public void RemoveFigure(IFigure removeItem)
         {
-            _worldDispatcher.Invoke(() =>
+            WorldDispatcher.Invoke(() =>
             {
                 if (!removeItem.Body.IsDisposed) removeItem.Clear();
             });
@@ -266,7 +275,7 @@ namespace CanvasPlayground.Physics
 
         public void RemoveComplexFigure(IComplexFigure removeItem)
         {
-            _worldDispatcher.Invoke(() => { removeItem.Clear(); });
+            WorldDispatcher.Invoke(() => { removeItem.Clear(); });
             lock (CFigures) CFigures.Remove(removeItem);
         }
 
@@ -276,7 +285,7 @@ namespace CanvasPlayground.Physics
             lock (Figures) removes = Figures.AsEnumerable().Reverse().Take(10);
 
             Debug.WriteLine($"Removing items: {removes.Count()}/{Figures.Count}");
-            _worldDispatcher.Invoke(() =>
+            WorldDispatcher.Invoke(() =>
             {
                 foreach (var remove in removes)
                 {
@@ -287,7 +296,7 @@ namespace CanvasPlayground.Physics
 
         public IFigure CreateFigure(Func<IFigure> figureCreation)
         {
-            return _worldDispatcher.Invoke(() =>
+            return WorldDispatcher.Invoke(() =>
             {
                 var figure = figureCreation?.Invoke();
                 if (figure != null) AddFigure(figure);
@@ -297,7 +306,7 @@ namespace CanvasPlayground.Physics
 
         public IComplexFigure CreateComplexFigure(Func<IComplexFigure> figureCreation)
         {
-            return _worldDispatcher.Invoke(() =>
+            return WorldDispatcher.Invoke(() =>
             {
                 var figure = figureCreation?.Invoke();
                 if (figure != null) AddComplexFigure(figure);

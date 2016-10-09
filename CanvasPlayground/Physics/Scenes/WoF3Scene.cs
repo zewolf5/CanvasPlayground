@@ -31,6 +31,10 @@ namespace CanvasPlayground.Physics.Scenes
         private IFigure _waitRectangle;
 
         private Info _countDownInfo;
+        private Info _info1;
+        private Info _info2;
+        private Info _info3;
+
 
         static Random random = new Random();
         private WorldLoop _worldLoop;
@@ -62,42 +66,43 @@ namespace CanvasPlayground.Physics.Scenes
                         testAABB.UpperBound = new Vector2(ConvertUnits.ToSimUnits(325), ConvertUnits.ToSimUnits(415));
                         testAABB.LowerBound = new Vector2(ConvertUnits.ToSimUnits(325), ConvertUnits.ToSimUnits(415));
 
-
-                        _worldLoop.World.QueryAABB((fixture) =>
+                        _worldLoop.BeginInvoke(() =>
                         {
-                            var figure = fixture.Tag as IFigure;
-                            if (!figure.Static && figure.Position.Y >= 430) //320
+                            _worldLoop.World.QueryAABB((fixture) =>
                             {
-                                if (lastId != figure.Id)
+                                var figure = fixture.Tag as IFigure;
+                                if (!figure.Static && figure.Position.Y >= 430) //320
                                 {
-                                    lastId = figure.Id;
-                                    countId = 0;
-                                }
-                                countId++;
-                                Debug.WriteLine($"Touching goal: {figure.Id} - {figure.HtmlColor} - #{countId} - {figure.Position.X},{figure.Position.Y}");
-
-                                if (countId >= 5)
-                                {
-                                    lastId = -1;
-                                    MoveBallToNextPart(figure);
-                                    var str = (--countDown).ToString();
-                                    if (_countDownInfo == null)
+                                    if (lastId != figure.Id)
                                     {
-                                        _countDownInfo = new Info() { F = "Arial", P = new Vector2(1125, 85), S = 60, T = str };
-                                        _worldLoop.TextInfos.Add(_countDownInfo);
-                                        _worldLoop.TextInfos.Add(new Info() { F = "Arial", P = new Vector2(775, 85), S = 60, T = "Baller igjen:" });
+                                        lastId = figure.Id;
+                                        countId = 0;
                                     }
-                                    else
-                                    {
-                                        _countDownInfo.T = str;
-                                        _countDownInfo.S += 5;
-                                    }
+                                    countId++;
+                                    Debug.WriteLine($"Touching goal: {figure.Id} - {figure.HtmlColor} - #{countId} - {figure.Position.X},{figure.Position.Y}");
 
+                                    if (countId >= 5)
+                                    {
+                                        lastId = -1;
+                                        MoveBallToNextPart(figure);
+                                        var str = (--countDown).ToString();
+                                        if (_countDownInfo == null)
+                                        {
+                                            _countDownInfo = new Info() { F = "Arial", P = new Vector2(1125, 85), S = 60, T = str };
+                                            _worldLoop.TextInfos.Add(_countDownInfo);
+                                            _worldLoop.TextInfos.Add(new Info() { F = "Arial", P = new Vector2(775, 85), S = 60, T = "Baller igjen:" });
+                                        }
+                                        else
+                                        {
+                                            _countDownInfo.T = str;
+                                            _countDownInfo.S += 5;
+                                        }
+
+                                    }
                                 }
-                            }
-                            return true;
-                        },
-                            ref testAABB);
+                                return true;
+                            }, ref testAABB);
+                        });
                     }
                     else
                     {
@@ -106,39 +111,115 @@ namespace CanvasPlayground.Physics.Scenes
                             _worldLoop.TextInfos.Clear();
                             foreach (var roundOneBall in _roundOneBalls)
                             {
-                                roundOneBall.Static = true;
+                                _worldLoop.BeginInvoke(() =>
+                                {
+                                    roundOneBall.Static = true;
+                                });
                             }
 
-                            _worldLoop.World.Gravity = new Vector2(0, -1);
+                            _worldLoop.BeginInvoke(() => _worldLoop.World.Gravity = new Vector2(0, -1));
+
                             var rect = _waitRectangle;
                             _waitRectangle = null;
-                            _wofObject.RotationPerSecond = 0f;
+                            _worldLoop.BeginInvoke(() => _wofObject.RotationPerSecond = 0f);
+
+
                             int cdown = 5;
 
                             _countDownInfo = new Info() { F = "Arial", P = new Vector2(900, 75), S = 60, T = $"Countdown: {cdown}" };
                             _worldLoop.TextInfos.Add(_countDownInfo);
 
-                            SceneTimer.RunSetup(new List<Tuple<int, Action>> {
-                            new Tuple<int, Action>(1000, () => {_countDownInfo.T = $"Countdown: {--cdown}";}),
-                            new Tuple<int, Action>(2000, () => {_countDownInfo.T = $"Countdown: {--cdown}";}),
-                            new Tuple<int, Action>(2500, () => {StartZigZaggers();}),
-                            new Tuple<int, Action>(3000, () => {_countDownInfo.T = $"Countdown: {--cdown}";}),
-                            new Tuple<int, Action>(4000, () => {_countDownInfo.T = $"Countdown: {--cdown}";}),
-                            new Tuple<int, Action>(5000, () => {_countDownInfo.T = $"Countdown: {--cdown}";}),
-                            new Tuple<int, Action>(5500, () => { _worldLoop.World.Gravity= new Vector2(0,4);}),
-                            new Tuple<int, Action>(6000, () => {
-                                _countDownInfo.T = $"GO";
-                                _worldLoop.RemoveFigure(rect);
-
-                                foreach (var roundTwoBall in _roundTwoBalls)
+                            SceneTimer.RunSetup(new List<Tuple<int, Action>>
+                            {
+                                new Tuple<int, Action>(1000, () => { _countDownInfo.T = $"Countdown: {--cdown}"; }),
+                                new Tuple<int, Action>(2000, () => { _countDownInfo.T = $"Countdown: {--cdown}"; }),
+                                new Tuple<int, Action>(2500, () => { StartZigZaggers(); }),
+                                new Tuple<int, Action>(3000, () => { _countDownInfo.T = $"Countdown: {--cdown}"; }),
+                                new Tuple<int, Action>(4000, () => { _countDownInfo.T = $"Countdown: {--cdown}"; }),
+                                new Tuple<int, Action>(5000, () => { _countDownInfo.T = $"Countdown: {--cdown}"; }),
+                                new Tuple<int, Action>(5500, () =>
                                 {
-                                    roundTwoBall.LinearVelocity = new Vector2(random.Next(25), random.Next(25));
+                                    _worldLoop.BeginInvoke(() => _worldLoop.World.Gravity = new Vector2(0, 4));
+                                }),
+                                new Tuple<int, Action>(6000, () =>
+                                {
+                                    _countDownInfo.T = $"GO";
+                                    _worldLoop.RemoveFigure(rect);
+
+                                    foreach (var roundTwoBall in _roundTwoBalls)
+                                    {
+                                        _worldLoop.BeginInvoke(() => roundTwoBall.LinearVelocity = new Vector2(random.Next(25), random.Next(25)));
+                                    }
+                                }),
+                                new Tuple<int, Action>(8000, () => {
+                                    _worldLoop.TextInfos.Clear();
+                                }),
+                            });
+                        }
+                        else
+                        {
+                            var balls = _roundTwoBalls.ToList();
+                            _worldLoop.BeginInvoke(() =>
+                            {
+                                foreach (var ball in balls)
+                                {
+                                    if (ball.Position.Y < 600 && Math.Abs(ball.LinearVelocity.X) < 100 && Math.Abs(ball.LinearVelocity.Y) < 100)
+                                    {
+                                        ball.LinearVelocity = new Vector2(random.Next(50), random.Next(50));
+                                    }
                                 }
-                            }),
-                            new Tuple<int, Action>(8000, () => {
-                                _worldLoop.TextInfos.Clear();
-                            }),
-                        });
+                            });
+
+                            if (_info1 == null)
+                            {
+                                foreach (var ball in balls)
+                                {
+                                    if (ball.Position.Y > 700)
+                                    {
+                                        _info1 = new Info() { F = "Arial", S = 20, P = new Vector2(800, 50), T = "" };
+                                        _info2 = new Info() { F = "Arial", S = 20, P = new Vector2(800, 80), T = "" };
+                                        _info3 = new Info() { F = "Arial", S = 20, P = new Vector2(800, 110), T = "" };
+                                        _worldLoop.TextInfos.Add(_info1);
+                                        _worldLoop.TextInfos.Add(_info2);
+                                        _worldLoop.TextInfos.Add(_info3);
+                                    }
+                                    break;
+                                }
+                            }
+                            if (_info1 != null)
+                            {
+                                _info1.T = "";
+                                _info2.T = "";
+                                _info3.T = "";
+
+                                var scores = balls.OrderBy(o => Vector2.Distance(o.Position, new Vector2(1150, 775))).ToList();
+                                if (scores.Count > 0) _info1.T = "Førsteplass: " + scores[0].Id;
+                                if (scores.Count > 1) _info2.T = "Andreplas: " + scores[1].Id;
+                                if (scores.Count > 2) _info3.T = "Tredjeplass: " + scores[2].Id;
+
+                                var movement = balls.Any(o => Vector2.Distance(o.LinearVelocity, Vector2.Zero) > 10);
+                                if (!movement)
+                                {
+                                    _worldLoop.TextInfos.Remove(_info2);
+                                    _worldLoop.TextInfos.Remove(_info3);
+                                    Task.Run(() =>
+                                    {
+                                        Thread.Sleep(200);
+                                        _info1.T = "VINNER!!! " + scores[0].Id;
+                                        Thread.Sleep(5000);
+
+                                        //DEBUG RESTART:
+                                        RenderingHub.Instance.Stop();
+                                        Thread.Sleep(1000);
+
+                                        RenderingHub.Instance.SceneStart("WoF3Scene");
+                                        Thread.Sleep(2000);
+                                        RenderingHub.Instance.SceneEvent("DropTheBalls");
+                                    });
+                                    return;
+                                }
+
+                            }
                         }
                     }
 
@@ -150,8 +231,12 @@ namespace CanvasPlayground.Physics.Scenes
 
         private void MoveBallToNextPart(IFigure ball)
         {
-            ball.Position = new Vector2(random.Next(600) + 900, 50);
-            ball.LinearVelocity = new Vector2(random.Next(50), random.Next(50));
+            _worldLoop.BeginInvoke(() =>
+            {
+                ball.Position = new Vector2(random.Next(600) + 900, 50);
+                ball.LinearVelocity = new Vector2(random.Next(50), random.Next(50));
+                ball.Restitution = 0.8f;
+            });
             _roundTwoBalls.Add(ball);
             _roundOneBalls.Remove(ball);
         }
@@ -181,9 +266,9 @@ namespace CanvasPlayground.Physics.Scenes
         public void Stop()
         {
             //Clean up!
-            foreach (var sceneFigure in _sceneFigures)
+            foreach (var sceneFigure in _sceneFigures.ToList())
             {
-                _worldLoop.RemoveFigure(sceneFigure);
+                _worldLoop?.RemoveFigure(sceneFigure);
             }
             _worldLoop = null;
         }
@@ -208,12 +293,12 @@ namespace CanvasPlayground.Physics.Scenes
                 }
 
 
-                var rect = AddFigure(()=>new HollowRectangle(_worldLoop.World, 800, 800, 20, 1150, 400, "blue", true) { Restitution = 0.8f, Friction = 1f });
+                var rect = AddFigure(() => new HollowRectangle(_worldLoop.World, 800, 800, 20, 1150, 400, "blue", true) { Restitution = 0.8f, Friction = 1f });
 
 
                 SceneTimer.RunSetup(new List<Tuple<int, Action>> {
                     new Tuple<int, Action>(1000, () => {
-                        _wofObject.RotationPerSecond = 0.8f;
+                        _worldLoop.BeginInvoke(() => _wofObject.RotationPerSecond = 0.8f);
                     }),
                     new Tuple<int, Action>(3500, () => {
                         CreateBallCourt();
@@ -240,19 +325,13 @@ namespace CanvasPlayground.Physics.Scenes
 
         private void CreateBallCourt()
         {
-            //_rollRectangle = AddFigure(new Rectangle(_worldLoop.World, 85, 20, 0.3f, 295, 340, "red", true) { Restitution = 0f });
-            //_rollRectangle = AddFigure(new Rectangle(_worldLoop.World, 150, 20, -0.3f, 390, 330, "red", true) { Restitution = 0f });
-
             _rollRectangle = AddFigure(() => new Rectangle(_worldLoop.World, 85, 20, 0.6f, 295, 440, "red", true) { Restitution = 0f });
             AddFigure(() => new Rectangle(_worldLoop.World, 150, 20, -0.6f, 390, 430, "red", true) { Restitution = 0f });
-
-            //AddFigure(new Rectangle(_worldLoop.World, 10, 200, 0, 250, 300, "red", true) { Restitution = 0f });
-            //AddFigure(new Rectangle(_worldLoop.World, 10, 200, 0, 450, 300, "red", true) { Restitution = 0f });
         }
 
         private void StartZigZaggers()
         {
-            for (int i = 825; i < 750 + 750; i += 50)
+            for (int i = 825; i < 1500; i += 50)
             {
                 AddFigure(() => new Triangle(_worldLoop.World, 0.15f, (float)random.NextDouble(), i, 150, "#000", true));
             }
@@ -260,64 +339,77 @@ namespace CanvasPlayground.Physics.Scenes
             ////var rects = new List<IFigure>();
 
 
-            bool oddRow = true;
-            for (int j = 250; j < 650; j += 50)
+            var arcHeight = 25;
+            var arcWidth = 50;
+            //var rects = new List<IFigure>();
+
+            for (int j = 250; j < 375; j += arcHeight)
             {
-                oddRow = !oddRow;
-                for (int i = 805; i < 750 + 725; i += 100)
+                for (int i = 770; i < 1550; i += arcWidth)
                 {
-                    var left = i + (50 / 2);
-                    if (oddRow) left += 50;
-
-                    var rect = AddFigure(() => new Rectangle(_worldLoop.World, 50, 5, 0, left, j, null, true));
-
+                    var rect = AddFigure(() => new Rectangle(_worldLoop.World, arcWidth, arcHeight, 0, i + (arcHeight / 2), j, null, true) { Restitution = 0.99f });
                     rect.OnCollision += Rect_OnCollision;
                 }
             }
 
-            //var arcHeight = 10;
-            //var arcWidth = 50;
-            ////var rects = new List<IFigure>();
+            bool oddRow = true;
+            for (int j = 450; j < 600; j += 75)
+            {
+                oddRow = !oddRow;
+                for (int i = 800; i < 750 + 725; i += 100)
+                {
+                    var left = i + (50 / 2);
+                    if (oddRow) left += 50;
 
-            //for (int j = 250; j < 650; j += arcHeight)
-            //{
-            //    for (int i = 775; i < 750 + 800; i += arcWidth)
-            //    {
-            //        var rect = AddFigure(new Rectangle(_worldLoop.World, arcWidth, arcHeight, 0, i + (arcHeight / 2), j, null, true));
-            //        bool noCollisionMode = false;//j > 450 && random.NextDouble() < 0.1f;
-            //        if (!noCollisionMode)
-            //        {
-            //            rect.OnCollision += Rect_OnCollision;
-            //        }
-            //        else
-            //        {
-            //            rect.OnCollision += Rect_OnCollisionHard;
-            //            rect.HtmlColor = "#000";
-            //        }
-            //    }
-            //}
+                    var rect = AddFigure(() => new Rectangle(_worldLoop.World, 50, 5, 0, left, j, null, true) { Restitution = 0.99f });
+
+                    rect.OnCollision += Rect_OnCollision2;
+                }
+            }
+
+            AddFigure(() => new Rectangle(_worldLoop.World, 400, 10, -0.08f, 940, 780, "black", true) { Restitution = 0.1f });
+            AddFigure(() => new Rectangle(_worldLoop.World, 400, 10, 0.08f, 1360, 780, "black", true) { Restitution = 0.1f });
+
+            AddFigure(() => new Triangle(_worldLoop.World, 0.3f, 0.6f, 752, 650, "black", true) { Restitution = 0.5f });
+            AddFigure(() => new Triangle(_worldLoop.World, 0.3f, -0.6f, 1548, 650, "black", true) { Restitution = 0.5f });
+            AddFigure(() => new Triangle(_worldLoop.World, 0.3f, 0.6f, 752, 600, "black", true) { Restitution = 0.5f });
+            AddFigure(() => new Triangle(_worldLoop.World, 0.3f, -0.6f, 1548, 600, "black", true) { Restitution = 0.5f });
+            AddFigure(() => new Triangle(_worldLoop.World, 0.3f, 0.6f, 752, 550, "black", true) { Restitution = 0.5f });
+            AddFigure(() => new Triangle(_worldLoop.World, 0.3f, -0.6f, 1548, 550, "black", true) { Restitution = 0.5f });
+
+            var barDistance = 100;
+            for (int i = 719 + barDistance; i < 1550; i += barDistance)
+            {
+                AddFigure(() => new Rectangle(_worldLoop.World, 10, 50, 0, i, 783, "black", true) { Restitution = 0.1f });
+            }
         }
 
 
         private bool Rect_OnCollision(IFigure arg1, IFigure arg2, FarseerPhysics.Dynamics.Contacts.Contact arg3)
         {
-            arg2.LinearVelocity *= 1.1f;
-            if (Math.Abs((int)arg2.LinearVelocity.X * (int)arg2.LinearVelocity.Y) > 5000) arg2.LinearVelocity *= 0.9f;
-            //Task.Run(() =>
-            //{
-            //    Thread.Sleep(25);
-            //    //_worldLoop.RemoveFigure(arg1);
-            //    arg2.LinearVelocity *= 1.1f;
-            //    if (Math.Abs((int)arg2.LinearVelocity.X * (int)arg2.LinearVelocity.Y) > 5000) arg2.LinearVelocity *= 0.9f;
-
-            //});
+            _worldLoop.BeginInvoke(() =>
+            {
+                Thread.Sleep(25);
+                _worldLoop.RemoveFigure(arg1);
+                if (arg2.Position.Y < 500 && Math.Abs(arg2.LinearVelocity.Y) < 100)
+                {
+                    arg2.LinearVelocity = new Vector2(arg2.LinearVelocity.X, arg2.LinearVelocity.Y + 200);
+                }
+            });
             return true;
         }
 
-        private bool Rect_OnCollisionHard(IFigure arg1, IFigure arg2, FarseerPhysics.Dynamics.Contacts.Contact arg3)
+
+        private bool Rect_OnCollision2(IFigure arg1, IFigure arg2, FarseerPhysics.Dynamics.Contacts.Contact arg3)
         {
-            arg2.LinearVelocity *= 1.1f;
-            if (Math.Abs((int)arg2.LinearVelocity.X * (int)arg2.LinearVelocity.Y) > 5000) arg2.LinearVelocity *= 0.9f;
+            _worldLoop.BeginInvoke(() =>
+            {
+                Thread.Sleep(25);
+                if (arg2.Position.Y < 500 && Math.Abs(arg2.LinearVelocity.Y) < 100)
+                {
+                    arg2.LinearVelocity = new Vector2(arg2.LinearVelocity.X, arg2.LinearVelocity.Y + 200);
+                }
+            });
             return true;
         }
 

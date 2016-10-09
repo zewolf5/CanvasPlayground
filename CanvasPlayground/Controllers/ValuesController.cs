@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -30,6 +31,7 @@ namespace CanvasPlayground.Controllers
         private static Lazy<Timer> updateTimer = new Lazy<Timer>(() => new Timer(UpdateClientsCallback, null, 0, 5));
         private static ConcurrentDictionary<StreamWriter, bool> clientSubscribers = new ConcurrentDictionary<StreamWriter, bool>();
 
+        private static Dictionary<long, string> _queuedUpFrames = new Dictionary<long, string>();
 
         public object Get(int sizeX, int sizeY)
         {
@@ -63,7 +65,10 @@ namespace CanvasPlayground.Controllers
 
             if (method == "getObjects")
             {
-                return GetObjectInfo();
+                //return GetExtendedObjectInfo();
+                HttpResponseMessage response = Request.CreateResponse();
+                response.Content = new StringContent(GetExtendedObjectInfo());
+                return response;
             }
 
             if (method == "start")
@@ -205,7 +210,20 @@ namespace CanvasPlayground.Controllers
                 }
                 var scene = GetObjectInfo();
                 _lastFrame = scene.FrameNo;
-                //Debug.WriteLine("Frame sent: " + _lastFrame);
+
+                lock (_queuedUpFrames)
+                {
+                    var now = (long)DateTime.Now.Subtract(startedTime).TotalMilliseconds;
+                    if (!_queuedUpFrames.ContainsKey(scene.Ms))
+                    {
+                        _queuedUpFrames.Add(scene.Ms, JsonConvert.SerializeObject(scene) + "\n\n");
+                    }
+                    var old = _queuedUpFrames.Where(o => now - o.Key > 270).ToList();
+                    foreach (var keyValuePair in old)
+                    {
+                        _queuedUpFrames.Remove(keyValuePair.Key);
+                    }
+                }
 
                 foreach (var pair in clientSubscribers.ToArray())
                 {
@@ -221,12 +239,35 @@ namespace CanvasPlayground.Controllers
                         bool dummy;
                         if (clientSubscribers.TryRemove(writer, out dummy))
                         {
-                            writer.Close();
+                            try
+                            {
+                                writer.Close();
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error closing stream: {ex.Message}");
+                            }
                         }
                     }
                 }
             }
         }
+
+        private static string GetExtendedObjectInfo()
+        {
+            var sb = new StringBuilder();
+            lock (_queuedUpFrames)
+            {
+                foreach (var queuedUpFrame in _queuedUpFrames.OrderBy(o=>o.Key))
+                {
+                    sb.Append(queuedUpFrame.Value);
+                }
+            }
+            return sb.ToString();
+        }
+
+
 
         private static SceneUpdate GetObjectInfo()
         {
@@ -237,32 +278,7 @@ namespace CanvasPlayground.Controllers
             scene.Info = RenderingHub.Instance.GetInfos().ToList();
             return scene;
         }
-        //// Gets the application pool collection from the server.
-        //[ModuleServiceMethod(PassThrough = true)]
-        //public ArrayList GetApplicationPoolCollection()
-        //{
-        //    // Use an ArrayList to transfer objects to the client.
-        //    ArrayList arrayOfApplicationBags = new ArrayList();
-
-        //    ServerManager serverManager = new ServerManager();
-        //    ApplicationPoolCollection applicationPoolCollection = serverManager.ApplicationPools;
-        //    foreach (ApplicationPool applicationPool in applicationPoolCollection)
-        //    {
-        //        PropertyBag applicationPoolBag = new PropertyBag();
-        //        //applicationPoolBag[ServerManagerDemoGlobals.ApplicationPoolArray] = applicationPool;
-        //        arrayOfApplicationBags.Add(applicationPoolBag);
-        //        // If the applicationPool is stopped, restart it.
-        //        if (applicationPool.State == ObjectState.Stopped)
-        //        {
-        //            applicationPool.Start();
-        //        }
-
-        //    }
-
-        //    // CommitChanges to persist the changes to the ApplicationHost.config.
-        //    serverManager.CommitChanges();
-        //    return arrayOfApplicationBags;
-        //}
+      
 
     }
 }
